@@ -1,0 +1,33 @@
+\chapter{Modelling} \label{sec:modelling}
+\section{Interior Magnet PMSM \label{sec:model_pmsm}}
+This leads to the to the continuous time state space model of Equation \eqref{equ:1_apv_ss}.
+\begin{equation}
+	\dfrac{d}{dt} \begin{bmatrix}
+		i_{Sd} \\i_{Sq}
+	\end{bmatrix}
+	= \begin{bmatrix}
+		-\frac{R_S}{L_d} & \frac{L_q}{L_d} \omega_e(t)\\ -\frac{L_d}{L_q} \omega_e(t) & -\frac{R_S}{L_q}
+	\end{bmatrix}\begin{bmatrix}
+		i_{Sd} \\i_{Sq}
+	\end{bmatrix} + 
+	\begin{bmatrix}
+		\frac{1}{L_d} & 0 \\ 0 & \frac{1}{L_q}
+	\end{bmatrix}\begin{bmatrix}
+		v_{Sd} \\v_{Sq}
+	\end{bmatrix} + \begin{bmatrix}
+		0 \\ - \frac{\psi_{PM}}{L_q} \omega_e(t)
+	\end{bmatrix}
+	\label{equ:1_apv_ss}
+\end{equation}
+
+
+\section{Coupling Dynamics \label{sec:model_coupling}}
+\begin{equation}
+	\begin{split}
+			J_1 \frac{\diff(\omega_{m1})}{\diff t} &= T_e - c \cdot \Delta\varphi - k \cdot \Delta\omega_m \\
+			J_2 \frac{\diff(\omega_{m2})}{\diff t} &= T_l + c \cdot \Delta\varphi + k \cdot  \Delta\omega_m \\
+			\frac{d(\varphi_{m1})}{dt} &= \omega_{m1} \\
+			\frac{d(\varphi_{m2})}{dt} &= \omega_{m2}
+	\end{split}
+	\label{equ:1_coupling}
+\end{equation}

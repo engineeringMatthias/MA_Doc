@@ -1,0 +1,132 @@
+\chapter{Model Predictive Current Control}
+
+\section{Prediction}
+Only Predict current dynamics, dont use coupling in prediction
+
+\subsection{Choice of adequate State Space Model}
+As derived in Section \ref{sec:model_pmsm}, the model of the interior magnet PMSM is given by Equation \eqref{equ:2_apv_ss}.
+\begin{equation}
+	\underbrace{
+	\dfrac{\diff}{\diff t} \begin{bmatrix}
+		i_{Sd} \\i_{Sq}
+	\end{bmatrix}}_{\Dot{\x}_c}
+	= 
+	\underbrace{
+	\begin{bmatrix}
+		-\frac{R_S}{L_d} & \frac{L_q}{L_d} \omega_e(t)\\ -\frac{L_d}{L_q} \omega_e(t) & -\frac{R_S}{L_q}
+	\end{bmatrix}}_{\bm{A}_c(\omega(t))}
+	\underbrace{
+	\begin{bmatrix}
+		i_{Sd} \\i_{Sq}
+	\end{bmatrix}}_{\x_c}
+ + 
+ 	\underbrace{
+	\begin{bmatrix}
+		\frac{1}{L_d} & 0 \\ 0 & \frac{1}{L_q}
+	\end{bmatrix}}_{\bm{B}_c}
+	\underbrace{
+	\begin{bmatrix}
+		u_{Sd} \\u_{Sq}
+	\end{bmatrix}}_{\bm{u}_c}
+ +
+ \underbrace{ 
+ \begin{bmatrix}
+		0 \\ - \frac{\psi_{PM}}{L_q} \omega_e(t)
+	\end{bmatrix}}_{\bm{E}_c(\omega(t))}
+	\label{equ:2_apv_ss}
+\end{equation}
+The nonlinear continuous time dynamic system is then given as
+\[
+\Dot{\x}_c = \bm{A}_c(\omega(t)) \x_c + \bm{B}_c {\bm{u}_c} + \bm{E}(\omega(t)
+\]
+
+or in compact notation:
+\[
+\Sigma: \left(\bm{A}_c(\omega(t)),\bm{B}_c,\bm{E}(\omega(t))\right)
+\]
+For most applications it is beneficial to work with a linear model, since this allows for the use of linear control approaches. However, the affine term regarding the induced voltage $\bm{E}(\omega(t))$ is non-negligable for the current dynamics $\Dot{\x}$ at every operating point except standstill.\\
+Using classical field-oriented PI current control, this is solved by splitting the system up into two linear, decoupled subsystems and two coupling terms (with the induced voltage acting affine to one of the).
+\begin{align*}
+	\Dot{i_{Sd}}
+	&=
+	\underbrace{
+		\frac{1}{L_d} v_{Sd} - \frac{R_S}{L_d} i_{Sd}
+	}_{\Sigma_\mrm{d,decoupled}}
+	+
+	\underbrace{
+		\frac{L_q}{L_d} \, \omega_e i_{Sq}
+	}_{\Sigma_\mrm{d,coupled}}
+	\\
+	\Dot{i_{Sq}}
+	&=
+	\underbrace{
+		\frac{1}{L_q} v_{Sq} - \frac{R_S}{L_q} i_{Sq}
+	}_{\Sigma_\mrm{q,decoupled}}
+	-
+	\underbrace{
+		\frac{L_d}{L_q} \, \omega_e i_{Sd}
+	}_{\Sigma_\mrm{q,coupled}}
+	-
+	\underbrace{
+		\frac{1}{L_q} \, \omega_e \psi_{PM}
+	}_{\Sigma_\mrm{q,affine}}
+\end{align*}
+The linear systems ${\Sigma_\mrm{d,decoupled}}$  and ${\Sigma_\mrm{q,decoupled}}$ are controlled using two independent PI controllers. The remaining terms are compensated by a feed-forward system.
+
+% TODO: gute begründung warum nicht schrittweise linearisieren.
+
+Analyzing  $\Sigma: \left(\bm{A}_c(\omega(t)),\bm{B}_c \right)$ in the context of linear parameter-varying systems, the framework of LPV System according to %TODO: cite Briat
+one has to quantify the influence of the parameter $\omega$. Due to the balance of angular momentum of the motor shaft \eqref{equ:1_coupling}, the electrical rotor speed $\omega = \omega_e = \omega_{m1}p$ is Lipschitz-continuous. With the eigenvalues of the respective dynamical system \eqref{equ:1_coupling} being slower than \eqref{equ:2_apv_ss}, as discussed in Section \ref{sec:model_coupling}.
+
+Thus, it was decided to use the affine prediction of Equation \eqref{equ:2_apv_ss} for the prediction.
+
+
+\subsection{Discretization}
+%\subsubsection{LTI Discretization using Forward-Euler}
+%\subsubsection{APV Discretization using Forward-Euler}
+\subsection{Prediction Horizon}
+
+\section{MPC Formulations}
+\subsection{Basic MPC}
+\subsection{MPC with Embedded Integrator}
+\subsection{Hybrid Approach}
+
+% integral Behavior, ref to deadtime compensation
+
+\section{Optimization Problem}
+\subsection{Cost Function}
+\subsection{Voltage Constraints}
+\subsection{Current Constraints}
+\subsubsection{Parameter-Varying Constraints}
+\subsection{Quadratic Program Formulation}
+\subsection{Solver}
+
+\section{Analysis of the Controller Structure}
+\subsection{Closed-Loop Structure with inactive Constraints}
+\subsection{Closed-Loop Structure with active Constraints}
+\subsection{Prediction Error Propagation}
+\subsection{Integral Behavior}
+
+%\section{Chose of Reference}
+
+\section{Extensions}
+\subsection{Deadtime Compensation}
+\subsection{Integral State Augmentation for the Basic MPC}
+\subsubsection{Windup}
+\subsection{Soft Constraints}
+
+\section{Experimental Evaluation}
+\subsection{Test Setup}
+\subsection{Step Response}
+\subsection{Constrained Operation}
+
+\section{Comparison of the MPC Approaches}
+\subsection{Steady State Behavior}
+\subsection{Timing Uncertainties}
+\subsection{Constrained Operation}
+\subsection{Computational Effort}
+
+\section{Discussion}
+
+
+

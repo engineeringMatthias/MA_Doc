@@ -21,6 +21,37 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
  % your macros
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% reminders
+\newcommand{\reminder}[1]{\colorbox{red}{#1}\xspace}%
+
 % Define supply voltage and peak current
 \newcommand{ \Us  }{ U_\mrm{s} }
 \newcommand{ \Ipk }{ \hat{I}   }
+
+% state space
+\newcommand{\Aw}{\bm{A}(\omega[k])}
+\newcommand{\B}{\bm{B}}
+\newcommand{\C}{\bm{C}}
+\newcommand{\Ew}{\bm{E}(\omega[k])}
+
+\newcommand{\x}{{\bm{x}}}
+%\newcommand{\u}{{\bm{u}}}
+
+
+% prediction
+\newcommand{\predDeltaU}{\bm{P}_{\Bar{\Delta u}}}
+\newcommand{\Deltaub}{\Bar{\bm{\Delta u}}[k]}
+
+% rotation matrix and its prediction
+\newcommand{\clarke}{\bm{T}_{abc\rightarrow \alpha \beta }}
+\newcommand{\park}{\bm{T}_{\alpha \beta \rightarrow d q}(\varphi [k])}
+\newcommand{\parkArg}[1]{\bm{T}_{\alpha \beta \rightarrow d q}\left(#1\right)}
+\newcommand{\predPark}{\Bar{\bm{T}}_{\alpha \beta \rightarrow d q}(\Bar{\varphi} [k])}
+\newcommand{\iclarke}{\bm{T}_{\alpha \beta \rightarrow abc }}
+\newcommand{\ipark}{\bm{T}_{ d q\rightarrow \alpha \beta}(\varphi [k])}
+\newcommand{\predipark}{\Bar{\bm{T}}_{ d q\rightarrow \alpha \beta}(\Bar{\varphi} [k])}
+\newcommand{\iparkArg}[1]{\bm{T}_{ d q \alpha \beta}\left(#1\right)}
+\newcommand{\iparkArgA}[1]{\bm{T}_{ d q\rightarrow \alpha \beta}\left(#1\right)}
+\newcommand{\prediparkapproxw}{{\Bar{\Tilde{\bm{T}}}}_{dq\alpha \beta}(\Bar{\Tilde{\varphi}} [k])} 
+
+\newcommand{\wLNorm}[2]{\| \bm{{#1}} \|_{\bm{#2}}^2 }
