@@ -1,0 +1,82 @@
+% packages.tex
+%%% formatting
+%\usepackage{fancyhdr}
+%\usepackage{scrlayer-scrpage} % Recommended package for headers/footers in KOMA-Script
+%\usepackage{titlesec}
+
+% Load scrhack package for compatibility
+\usepackage{scrhack}
+
+%replace package 'fancyhdr' with ''scrpage' because of conflicts with KOMA-script class
+\usepackage[automark,
+            %headwidth=textwithmarginpar,
+            %footwidth=text,
+            footsepline=0.4pt, 
+            headsepline=0.4pt,
+            plainheadsepline,
+            plainfootsepline]{scrlayer-scrpage}
+\usepackage{mwe}
+\usepackage[nomarginpar]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[onehalfspacing]{setspace}
+\usepackage{layout} % graphical page layout (spacings)
+\usepackage{xspace} % add space after macros if not followed by punctuation character
+\usepackage{calc} % online calculations
+\usepackage{xcolor} % e.g., for color boxes
+\usepackage{rotating} % to rotate objects
+\usepackage{gensymb} % symbols (perthousand, Celsius, ...)
+\usepackage[right]{eurosym} % euro symbol on the right side (51 EUR)
+\usepackage[normalem]{ulem} % cross-out, strike-out, underlines 
+\usepackage{paralist} % extended list environments
+\usepackage[avantgarde]{quotchap}
+\usepackage{datetime}
+\usepackage{pdfpages}
+%%% text 
+\usepackage{imakeidx}
+\usepackage[]{caption}% customize captions
+\usepackage{multicol}% multi-column layout
+\usepackage{setspace}% (properly) set linespreads
+\usepackage[stable,bottom,hang,splitrule,multiple]{footmisc}% customize footnotes
+
+%%% Language packages 
+\usepackage{babel}
+%\usepackage[english,german]{babel}
+%\usepackage[latin1]{inputenc} 
+
+%%% equations and mathematical input
+\usepackage{amsmath,amssymb,amstext,bm}
+\usepackage{mathcomp}% symbols in math mode
+%\usepackage[utf8]{inputenc}
+
+%%% tables 
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{tabularx}
+\usepackage{hhline}
+\usepackage{longtable} %for tables longer than one page
+\usepackage{dcolumn} %for number alignment in tables
+\usepackage{colortbl} %color in tables
+
+%%% graphics and plots 
+\usepackage{graphicx} %to include graphics in document 
+%\usepackage{subfigure} %subfigures (a),(b),(c)... within figures
+\usepackage{caption}
+\usepackage{subcaption}
+
+\usepackage{placeins} %preventing floats from crossing a barrier
+\usepackage{float} %to place floats !HERE!
+\usepackage{psfrag} %replace text in eps figures
+\usepackage{wrapfig} %inline graphics
+\usepackage[export]{adjustbox}
+
+%%% Code and listings
+\usepackage{listings}
+\usepackage{xcolor}
+
+%%% Links and references 
+\usepackage{url}
+\usepackage{hyperref}
+
+%%% Biblography and citing 
+\usepackage{cite}
+\usepackage{glossaries}

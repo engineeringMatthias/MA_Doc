@@ -1,0 +1,112 @@
+% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % 
+% EALS LATEX TEMPLATE
+% Main
+% Thesis template
+% 
+% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % 
+% % % Authors % % % 
+% Jana Winkler (jana.winkler@student.tugraz.at)
+%
+% % % Changelog % % % 
+% 0.1 - (19.10.2023) - Created file in main.tex and added context
+% 0.2 - (10.11.2023) - pushed content to other files, imported files
+% 0.3 - (10.11.2023) - Added specifications of the document class
+% 0.4 - (01.05.2023) - Deleted declaration of a statutory declaration.
+%                      Added Chapter 1 + Subsections
+%                      Changed formatting (header, footer, page numbering)
+% 0.5 - (15.05.2023) - Added sections about code listings and tabels
+% 0.6 - (23.05.2023) - Added sections about structure and referencing
+% 0.7 - (23.05.2023) - Added glossary and list of figures and tables.
+% 0.8 - (05.06.2023) - Rewrote section to get rid of warnings
+% % % To-Do % % % 
+% write How-To for Makros 
+% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
+
+\documentclass[
+a4paper,           
+twoside, 
+openright,
+11pt,
+headsepline,
+footsepline,
+headheight=2mm, % Set \headheight to 2mm
+fleqn, % Equations not centered, but on the left side
+captions=figuresignature, % Captions below figures
+captions=tablesignature, % Captions below tables
+numbers=noenddot, % Do not generate a point at the end of section numbers (e.g. 1.4.5 instead of 1.4.5.)
+headlines=2, % We need two lines in the header plus some additional space
+german,
+english
+]{scrbook}
+
+%import needed packages and macros
+\input{packages}
+\input{macros}
+
+% insert glossary entries
+\makeglossaries
+\input{sample_glossary}
+
+% define bibliography style
+\bibliographystyle{IEEEtran}
+\setlength{\textheight}{22 true cm}
+\oddsidemargin  0.5 cm
+\evensidemargin 0.5 cm
+\topmargin      0 cm
+
+\renewcommand{\textfraction}{.2}
+\renewcommand{\floatpagefraction}{.8}
+
+% % % % % % % % % % % % % % % % % % % % % % % % % % % %
+\begin{document}
+
+% set page numbering to roman numerals
+\pagenumbering{Roman}
+
+% Include title page
+\input{titlepage}
+
+% Include acknowledgments
+\input{acknowledgements}
+
+% Include abstract in English and German
+\input{abstract}
+
+% Insert table of contents
+\tableofcontents
+\clearpage
+
+% Prints glossary we defined in glossary.tex
+\printglossaries
+\newpage \ \thispagestyle{empty} \newpage 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+% Set new textbody pagestyle
+
+\pagenumbering{arabic}
+\onehalfspacing
+\pagestyle{scrheadings}
+
+%Insert thesis here
+\input{Chapter_1}
+\newpage
+\input{Chapter_2}
+%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Biblography: We provide a sample bibliography file called "sample.bib".
+% You are advised to create your own bib-file with the same structure
+\bibliography{sample_biblography}
+
+% This command automatically creates a list of all labeled figures
+
+\listoffigures
+
+% This command automatically creates a list of all labeled tables
+
+\listoftables
+
+% Appendix: Here we provide an example of an appendix.
+\appendix
+\input{appendix}
+
+\end{document}
