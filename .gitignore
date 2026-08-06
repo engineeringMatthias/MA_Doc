@@ -1,0 +1,44 @@
+# further non essential directories
+/temp
+
+# LaTeX build artifacts
+*.aux
+*.log
+*.out
+*.toc
+*.bbl
+*.blg
+*.bcf
+*.run.xml
+*.synctex.gz
+*.synctex(busy)
+
+# Glossaries / Acronyms
+*.acn
+*.acr
+*.alg
+*.glg
+*.glo
+*.gls
+*.ist
+
+# Index files
+*.idx
+*.ilg
+*.ind
+
+# Bibliography (biblatex / biber)
+*.fdb_latexmk
+*.fls
+
+# Latexmk
+*.lof
+*.lot
+
+# Cache / temporary files
+*.tmp
+*.bak
+*.sav
+*.nav
+*.snm
+*.vrb
