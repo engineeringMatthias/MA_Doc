@@ -223,7 +223,7 @@ The code example below, shows how to generate a simple table. Here the structure
 
 \subsection{Table Formatting}
 \label{subsec:format-tables}
-You can adjust column alignment and add more complex formatting. This can be done by adding an alignment specifier and vertical bars | for vertical lines to the tabular command, as can be seen in the code example below.
+You can adjust column alignment and add more formatting. This can be done by adding an alignment specifier and vertical bars | for vertical lines to the tabular command, as can be seen in the code example below.
 \begin{verbatim}
 \begin{table}[h]
 \centering
@@ -580,3 +580,36 @@ Including your terms in your text, using the commands from above may look someth
 In this thesis, we will use \gls{latex} to prepare a high-quality document. The \Gls{latex} typesetting markup language is especially suitable 
 for documents that include \gls{maths}. \Glspl{formula} are rendered 
 easily once one gets used to the commands.
+
+\section{Model Predictive Control \label{sec:intro_mpc}}
+\subsection{Comparison to classical control \label{sec:intro_comp_cs}}
+Using classical field-oriented PI current control, this is solved by splitting the system up into two linear, decoupled subsystems and two coupling terms (with the induced voltage acting affine to one of the).
+\begin{align*}
+	\Dot{i_{Sd}}
+	&=
+	\underbrace{
+		\frac{1}{L_d} u_{Sd} - \frac{R_S}{L_d} i_{Sd}
+	}_{\Sigma_\mrm{d,decoupled}}
+	+
+	\underbrace{
+		\frac{L_q}{L_d} \, i_{Sq}  \omega 
+	}_{\Sigma_\mrm{d,coupled}}
+	\\
+	\Dot{i_{Sq}}
+	&=
+	\underbrace{
+		\frac{1}{L_q} u_{Sq} - \frac{R_S}{L_q} i_{Sq}
+	}_{\Sigma_\mrm{q,decoupled}}
+	-
+	\underbrace{
+		\frac{L_d}{L_q} \,  i_{Sd} \omega
+	}_{\Sigma_\mrm{q,coupled}}
+	-
+	\underbrace{
+		\frac{1}{L_q} \, \psi_{PM} \omega 
+	}_{\Sigma_\mrm{q,affine}}
+\end{align*}
+The linear systems ${\Sigma_\mrm{d,decoupled}}$  and ${\Sigma_\mrm{q,decoupled}}$ are controlled using two independent PI controllers. The remaining terms are compensated by a feed-forward system.
+\\
+
+\section{2 Level Inverter} \label{sec:intro_vsi}

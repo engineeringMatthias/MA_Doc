@@ -1,8 +1,8 @@
 \chapter{Model Predictive Current Control}
 
-\section{Prediction}
+\section{Prediction Model}
 Only Predict current dynamics, dont use coupling in prediction
-
+Caramaot OaC book zitieren.
 \subsection{Choice of adequate State Space Model}
 As derived in Section \ref{sec:model_pmsm}, the model of the interior magnet PMSM is given by Equation \eqref{equ:2_apv_ss}.
 \begin{equation}
@@ -13,7 +13,7 @@ As derived in Section \ref{sec:model_pmsm}, the model of the interior magnet PMS
 	= 
 	\underbrace{
 	\begin{bmatrix}
-		-\frac{R_S}{L_d} & \frac{L_q}{L_d} \omega_e(t)\\ -\frac{L_d}{L_q} \omega_e(t) & -\frac{R_S}{L_q}
+		-\frac{R_S}{L_d} & \frac{L_q}{L_d} \omega(t)\\ -\frac{L_d}{L_q} \omega(t) & -\frac{R_S}{L_q}
 	\end{bmatrix}}_{\bm{A}_c(\omega(t))}
 	\underbrace{
 	\begin{bmatrix}
@@ -31,77 +31,538 @@ As derived in Section \ref{sec:model_pmsm}, the model of the interior magnet PMS
  +
  \underbrace{ 
  \begin{bmatrix}
-		0 \\ - \frac{\psi_{PM}}{L_q} \omega_e(t)
+		0 \\ - \frac{\psi_{PM}}{L_q} \omega(t)
 	\end{bmatrix}}_{\bm{E}_c(\omega(t))}
 	\label{equ:2_apv_ss}
 \end{equation}
-The nonlinear continuous time dynamic system is then given as
-\[
-\Dot{\x}_c = \bm{A}_c(\omega(t)) \x_c + \bm{B}_c {\bm{u}_c} + \bm{E}(\omega(t)
-\]
+For the ease of notation, $\omega = \omega_e = \omega_{m1}p$ refers to the electrical rotor speed for the rest of this thesis. Writing the nonlinear continuous time dynamic system in established control theory notation leads to the following notation:
+\begin{equation}
+	\begin{split}
+		\Dot{\x}_c  &= \bm{f}(\bm{x}_c,\bm{u}_c,\omega )\\
+		\Dot{\x}_c &= \bm{A}_c(\omega(t)) \x_c + \bm{B}_c {\bm{u}_c} + \bm{E}_c(\omega(t))
+	\end{split}
+	\label{equ:2_apv_cs_ss}
+\end{equation}
 
-or in compact notation:
-\[
-\Sigma: \left(\bm{A}_c(\omega(t)),\bm{B}_c,\bm{E}(\omega(t))\right)
-\]
-For most applications it is beneficial to work with a linear model, since this allows for the use of linear control approaches. However, the affine term regarding the induced voltage $\bm{E}(\omega(t))$ is non-negligable for the current dynamics $\Dot{\x}$ at every operating point except standstill.\\
-Using classical field-oriented PI current control, this is solved by splitting the system up into two linear, decoupled subsystems and two coupling terms (with the induced voltage acting affine to one of the).
-\begin{align*}
-	\Dot{i_{Sd}}
-	&=
-	\underbrace{
-		\frac{1}{L_d} v_{Sd} - \frac{R_S}{L_d} i_{Sd}
-	}_{\Sigma_\mrm{d,decoupled}}
+
+
+%or in compact notation:
+%\[
+%\Sigma: \left(\bm{A}_c(\omega(t)),\bm{B}_c,\bm{E}(\omega(t))\right)
+%\]
+For a variety of applications it is beneficial to work with linear models, since this allows for the use of broad framework of control schemes. However, the affine term regarding the induced voltage $\bm{E}_c(\omega(t))$ is non-negligable for the current dynamics $\Dot{\x}$ at every operating point except standstill or locked rotor operation.\\
+
+As mentioned in Section \ref{sec:intro_comp_cs}, using model predictive control, one can directly use a MIMO formulation, leading to a direct consideration the D/Q axis coupling. The question remaining is whether a discretized model of Equation \eqref{equ:2_apv_ss} shall be directly used or a step-wise linearization approach around an operating point shall be employed. For the linearization, one would define an operating point as
+\begin{equation*}
+	\bm{x}_c
+	=
+	\bm{x}_{c,\mathrm{OP}}
 	+
-	\underbrace{
-		\frac{L_q}{L_d} \, \omega_e i_{Sq}
-	}_{\Sigma_\mrm{d,coupled}}
-	\\
-	\Dot{i_{Sq}}
+	\bm{\delta x}_c,
+	\qquad
+	\bm{u}_c
+	=
+	\bm{u}_{c,\mathrm{OP}}
+	+
+	\bm{\delta u}_c,
+	\qquad
+	\omega
+	=
+	\omega_{\mathrm{OP}}
+	+
+	\delta\omega .
+\end{equation*}
+
+And approximate the dynamics \eqref{equ:2_apv_cs_ss} using a first-order Taylor approximation around an operating point $\mrm{OP} = (\bm{x}_{c,\mathrm{OP}},\bm{u}_{c,\mathrm{OP}},\omega_{\mathrm{OP}})$
+\begin{align*}
+	\frac{\diff \bm{\delta x}_c}{\diff t}
 	&=
-	\underbrace{
-		\frac{1}{L_q} v_{Sq} - \frac{R_S}{L_q} i_{Sq}
-	}_{\Sigma_\mrm{q,decoupled}}
-	-
-	\underbrace{
-		\frac{L_d}{L_q} \, \omega_e i_{Sd}
-	}_{\Sigma_\mrm{q,coupled}}
-	-
-	\underbrace{
-		\frac{1}{L_q} \, \omega_e \psi_{PM}
-	}_{\Sigma_\mrm{q,affine}}
+	\left.
+	\frac{\partial\bm{f}}{\partial\bm{x}_c}
+	\right|_{\mathrm{OP}}
+	\bm{\delta x}_c
+	+
+	\left.
+	\frac{\partial\bm{f}}{\partial\bm{u}_c}
+	\right|_{\mathrm{OP}}
+	\bm{\delta u}_c
+	+
+	\left.
+	\frac{\partial\bm{f}}{\partial\omega}
+	\right|_{\mathrm{OP}}
+	\delta\omega .
 \end{align*}
-The linear systems ${\Sigma_\mrm{d,decoupled}}$  and ${\Sigma_\mrm{q,decoupled}}$ are controlled using two independent PI controllers. The remaining terms are compensated by a feed-forward system.
+Analyzing the nonlinear system \eqref{equ:2_apv_ss}, it can be seen that th only non-linearity stems from the induced voltage  $\bm{E}_c(\omega(t))$ , which is proportional to the scheduling parameter $\omega$. As shown in Section \ref{sec:modelling}, the dynamics of the mechanical system are slower than the electrical dynamics, assuming $\omega(t)$ is slowly varying relative to the sampling period $T_S$. Therefore, introducing step-wise linearization only leads to increased complexity without reducing the computational effort.\\
 
-% TODO: gute begründung warum nicht schrittweise linearisieren.
 
-Analyzing  $\Sigma: \left(\bm{A}_c(\omega(t)),\bm{B}_c \right)$ in the context of linear parameter-varying systems, the framework of LPV System according to %TODO: cite Briat
-one has to quantify the influence of the parameter $\omega$. Due to the balance of angular momentum of the motor shaft \eqref{equ:1_coupling}, the electrical rotor speed $\omega = \omega_e = \omega_{m1}p$ is Lipschitz-continuous. With the eigenvalues of the respective dynamical system \eqref{equ:1_coupling} being slower than \eqref{equ:2_apv_ss}, as discussed in Section \ref{sec:model_coupling}.
-
-Thus, it was decided to use the affine prediction of Equation \eqref{equ:2_apv_ss} for the prediction.
-
+Thus, it was decided to use the affine prediction model of Equation \eqref{equ:2_apv_ss} directly. This approach is also typically used in literature. %TODO: cite boecker und noch viele andere
 
 \subsection{Discretization}
-%\subsubsection{LTI Discretization using Forward-Euler}
-%\subsubsection{APV Discretization using Forward-Euler}
-\subsection{Prediction Horizon}
+Due to its simplicity, Forward Euler discretization shall be considered. This approach conserves stability, when the sampling time $T_S$ is sufficiently small. The mapping of continuous time eigenvalues to discrete time eigenvalues $\underline{s}_i = a + \J b \rightarrow \underline{z}_i$ is described as
+\[
+\underline{z}_i = 1 + T_S \underline{s}_i
+\]
+For $\underline{z}_i$ to be within the unit circle
+\[
+\| \underline{z}_i \| = \| 1 + T_S \underline{s}_i \| = 1 + 2T_S^2 a + T_S a^2  + T_S b^2 < 1 \iff  T_S^2 (a^2 + b^2) < - 2 T_S a
+\]
+must hold. So, for positive $T_S$, this can be rewritten as
+\[
+T_S \| \underline{s}_i \|^2 < -2 \RE\{\underline{s}_i\} \iff T_S < \frac{ -2 \RE\{\underline{s}_i\}}{ \| \underline{s}_i \|^2}
+\]
+With the eigenvalue analysis of Section \ref{sec:modelling} and $T_S \le \qty{200}{\micro s}$ within the scope of this thesis, applying the Forward Euler approach will lead to stable discretization for the model of the PMSM. The discretized state space model is then obtained by:
+\begin{align*}
+	\boldsymbol{A}(\omega[k]) &= \boldsymbol{I} + T_S\boldsymbol{A}_c(\omega(kT_S)) \quad \boldsymbol{B} = T_S \boldsymbol{B}_c \quad \\  
+	\boldsymbol{E}(\omega[k]) &= \boldsymbol{E}_c (\omega(kT_S)) 
+\end{align*}
+In literature the actuating signal is often split up as $ \bm{u}[k]=\bm{u}[k-1] + \bm{\Delta u}[k]$. This offers benefits as it eases the stability analysis %TODO cite OaC book
+or improves some aspects of robustness as shown in Section \ref{sec:mpcc_comp} (Page \pageref{sec:mpcc_comp}). So, the discrete time-model for prediction is given by Equation \eqref{equ:2_apv_tk}.
+\begin{equation}
+	\begin{split}
+		\x [k+1] &= \Aw \x[k] + \B (\bm{u}[k-1] + \bm{\Delta u}[k] ) + \Ew \\
+%		\begin{bmatrix}i_{Sd}[k+1] \\ i_{Sq}[k+1] 
+%		\end{bmatrix}  =
+		\x[k+1] &= \begin{bmatrix} 1-\dfrac{T_s R_S}{L_d} & T_s\dfrac{L_q}{L_d}\omega[k] \\[6pt] -T_s\dfrac{L_d}{L_q}\omega[k] & 1-\dfrac{T_s R_S}{L_q} \end{bmatrix} \x[k] \\[6pt] &\quad+ \begin{bmatrix} \dfrac{T_s}{L_d} & 0 \\[6pt] 0 & \dfrac{T_s}{L_q} \end{bmatrix} \left( \bm{u}[k-1]+\bm{\Delta u}[k] \right) + \begin{bmatrix} 0 \\[6pt] -\dfrac{T_s\psi_{PM}}{L_q}\omega[k] \end{bmatrix}
+	\end{split}
+	\label{equ:2_apv_tk}
+\end{equation}
 
-\section{MPC Formulations}
-\subsection{Basic MPC}
-\subsection{MPC with Embedded Integrator}
-\subsection{Hybrid Approach}
+\subsection{Prediction Horizon}
+In model predictive one distinguishes between the prediction horizon $N_P$, which describes how many discrete steps in time the dynamics are predicted and the control horizon $N_C$, which is the amount of optimal actuating signal are computed at every step. With $N_C \le N_P$ % TODO: maybe move this to the intro
+Within the scope of this thesis, typically field-oriented current control sampling times of $T_S \in [5,\, 20]\;\si{kHz}$ are considered. To get an optimal trade off between model fault tolerance, tracking performance and computational effort a typical prediction horizon of $N_P \le 3$  with $N_P = N_C$ are considered.\\
+To obtain a prediction for  $\x[k+l]\; l\in \mathbb{N}\; l\le N_P $ , Equation \eqref{equ:2_apv_tk} is iterated one step ahead.
+\begin{align*}
+	\xh[k+2] = \bm{A}(\hat{\omega}[k+1]) \xh[k+1] + \B (\bm{u}[k] + \bm{\Delta u}[k+1] ) + \bm{E}(\hat{\omega}[k+1])
+\end{align*}
+Using Relation \eqref{equ:2_apv_tk} for the estimation $\xh[k+1]$, $\bm{u}[k]  = \bm{u}[k-1] + \bm{\Delta u}[k] $ and assuming $\hat{\omega}[k+l] = \omega[k]$, leads to
+\begin{align*}
+	\xh[k+2] &= \Aw \left(\Aw \x[k] + \B (\bm{u}[k-1] + \bm{\Delta u}[k] + \Ew \right) \\ 
+	&+  \B (\bm{u}[k-1] + \bm{\Delta u}[k] + \bm{\Delta u}[k+1]) + \Ew \\
+	\xh[k+2] &= \left(\Aw \right)^2 + \left(\Aw + \I \right) \B \bm{u}[k-1] \\ & + \B  \left(\Aw + \I \right) \bm{\Delta u} [k] + \B \bm{\Delta u} [k+1] + \left(\Aw + \I \right) \Ew
+\end{align*}
+This continues up to $l=N_P$.
+\begin{align*}
+	\xh[k+N_P]
+	&= \left(\Aw\right)^{N_P}\x[k]
+	+ \left(\sum_{f=0}^{N_P-1}\left(\Aw\right)^f\right)
+	\B\bm{u}[k-1] \\
+	&\quad
+	+ \sum_{h=0}^{N_P-1}
+	\left(
+	\sum_{f=0}^{N_P-1-h}
+	\left(\Aw\right)^f
+	\right)
+	\B\bm{\Delta u}[k+h] \\
+	&\quad
+	+ \left(\sum_{f=0}^{N_P-1}\left(\Aw\right)^f\right)
+	\Ew 
+\end{align*}
+For the nominal system \eqref{equ:2_apv_tk}, the output is equal to the current states $y[k] = x[k]$, but for other formulations with $\bm{C}  \ne \I$ it is necessary to multiply the state description from the left by $\bm{C}$ to obtain an estimation for the output $\hat{\bm{y}}[k+l]$. Doing that and using vector notations for all $l$ of $\xh[k+l]$, leads to 
+
+\begin{align}
+	&
+\underbrace{
+	\begin{bmatrix}
+		\hat{\bm{y}}[k+1] \\
+		\hat{\bm{y}}[k+2] \\
+		\vdots \\
+		\hat{\bm{y}}[k+N_P] \\
+	\end{bmatrix}
+}_{\Bar{\bm{y}}[k+1]} =
+\underbrace{
+	\begin{bmatrix}
+	\bm{C} \Aw  \\
+	\bm{C}  \left(\Aw \right)^2 \\
+	\vdots \\
+	\bm{C} \left(\Aw \right)^{N_P-1} \\
+	\end{bmatrix}
+}_{\bm{P}_x}
+\x[k] +
+\underbrace{
+	\begin{bmatrix}
+		\bm{C} \B \\
+		\bm{C}\left(\Aw + \I \right) \B \\
+		\vdots \\
+		\bm{C} \left( \sum_{l=0}^{N_P-1} \left(\Aw \right)^l \right) \B 
+	\end{bmatrix}
+}_{\bm{P}_u}
+\bm{u}[k-1] + \\
+&
+\underbrace{
+	\begin{bmatrix}
+%		\scriptstyle
+		\bm{CB} & \bm0_2 & \cdots & \bm0_2\\
+		\bm{C}(\bm{A}(\omega[k])+\bm{I})\bm{B} & \bm{CB} & \cdots & \bm0_2\\
+		\bm{C}\left(\left(\bm{A}(\omega[k])\right)^2+\bm{A}(\omega[k])+\bm{I}\right)\bm{B} & \bm{C}(\bm{A}(\omega[k])+\bm{I})\bm{B}  & \ddots & \vdots\\
+		\vdots & \vdots & \ddots & \bm0_2\\
+		\bm{C}\left(\sum\limits_{l=0}^{N_P-1}\left(\bm{A}(\omega[k])\right)^l\right)\bm{B}
+		&
+		\bm{C}\left(\sum\limits_{l=0}^{N_P-2}\left(\bm{A}(\omega[k])\right)^l\right)\bm{B}
+		&
+		\cdots
+		&
+		\bm{CB}
+	\end{bmatrix}
+}_{\predDeltaU} 
+\underbrace{
+	\begin{bmatrix}
+%		\scriptstyle
+		{ \boldsymbol{\Delta u}}[k] \\
+		{ \boldsymbol{\Delta u}}[k+1]\\
+		\vdots \\
+		\vdots \\
+		{ \boldsymbol{\Delta u}}[k+N_P-1]
+	\end{bmatrix}
+}_{\Deltaub} \\
+&+ 
+\underbrace{
+	\begin{bmatrix}
+		\bm{C} \\
+		\bm{C}\left(\Aw + \I \right) \\
+		\vdots \\
+		\bm{C} \left( \sum_{l=0}^{N_P-1} \left(\Aw \right)^l \right) 
+	\end{bmatrix}
+}_{\bm{P}_E}
+\Ew
+\end{align}
+\begin{equation}
+	\Bar{\bm{y}}[k+1] = \underbrace{ \bm{P}_{x} \Bar{\x}[k] + \bm{P}_u \bm{u}[k-1] + \bm{P}_{E}\Ew }_{=:\Bar{\bm{g}}[k]} + \bm{P}_{\Bar{\Delta u}} \Deltaub
+	\label{equ:2_prediction}
+\end{equation}
+With $\Bar{\bm{g}}[k]$ being parameter variant, but independent of $\Deltaub$. For the implementation it is beneficial to recognize that the columns of $\predDeltaU$ are down-shifted columns of $\bm{P}_u$.
 
 % integral Behavior, ref to deadtime compensation
 
 \section{Optimization Problem}
+The vector of the voltage increment at the current step in time and its predictions up to the $N_P$th step shall be determined optimal with respect to a certain cost function $J$ and constraints regarding the stator voltage and the predicted current response, such that the determined stator voltage can be physically applied without damaging the machine. For the actuating signal $\Bar{\bm{u}_S}[k]$, this means it has to be bounded by the voltage hexagon and the magnitude of each $\Bar{\bm{i}_S}[k+1]$ must not exceed the current limit $I_max$. Doing so, leads to a general description for MPC for PMSM, similar to the one used in %TODO \cite{TOMPFC}.
+\begin{align*}
+	\Bar{\bm{\Delta u}_S}[k]^* = \arg \min_{\Bar{\bm{\Delta  u}_S}}\; &J(\boldsymbol{u}_{S}[k], \boldsymbol{i}_{S}[k], \boldsymbol{i}_{S,ref}[k+1])\\
+	 \text{s.t.} \quad \boldsymbol{i}_{S}[k+1] \in \mathbb{I}_S &= \{\boldsymbol{i}_{S} \in \mathbb{R}^2 |\|\boldsymbol{i}_{S}^R[k+1]\|_2 \leq {I}_{max} \} \\
+	  \boldsymbol{u}_{S}^S[k] \in \mathbb{U}_{S}^S &= \{ \boldsymbol{u}_{S}^S \in \mathbb{R}^2 | \boldsymbol{u}_{S}^S = U_{DC} \boldsymbol{T}_{abc\rightarrow dq} \boldsymbol{d}_{abc} \}
+\end{align*}
+Since the controller operates within the RRF, the relation for the voltage constraints must be transformed. To gurantee a unique global minimizer, $J$ must be a convex function and $\mathbb{U}_{S}^R, \mathbb{I}_{S}^R$ convex sets, expressed as a set of linear inequality constraints. To use the framework of quadratic programming, the constraints must be expressed in terms of the optimization variable $\Deltaub$. Keeping this in mind and using index $u$ for quantities regarding the prediction vector of the actuating signal $\Bar{\bm{u}_S}[k]$ and $i$ for quantities regarding the output prediction vector $\Bar{\bm{i}_S}[k+1]$, the goal of this section is to derive a quadratic program in the Form of
+\begin{align*}
+	\Bar{\bm{\Delta u}_S^R}[k]^* = \arg \min_{\Bar{\bm{\Delta  u}_S}}\; \frac{1}{2} &\left(\Deltaubsr \right)^\T \bm{\Gamma} \Deltaubsr + \bm{\gamma}^\T \Deltaubsr\\
+	 \text{s.t.} \quad \underbrace{
+	 	\begin{bmatrix}
+	 		\bm{M}_u \\
+	 		\bm{M}_i
+	 	\end{bmatrix}
+	 }_{\bm{M}}
+	 \Deltaubsr
+	 & \le
+	 \underbrace{
+	 	\begin{bmatrix}
+	 		\bm{\mu}_u\\
+	 		\bm{\mu}_i
+	 \end{bmatrix}}_{\bm{\mu}}
+\end{align*}
+with the Hessian of the cost function being positive definite $\nabla^2 J = \bm{\Gamma}  \succ 0 $ to ensure convexity.
+
 \subsection{Cost Function}
+For the cost function $J$, a simple LQR-style base cost is employed. With $\bm{Q} \in \mathbb{R}^{N_P q\times N_P q}$ as the diagonal weighting matrix for the tracking error and $\bm{R} \in \mathbb{R}^{N_P m\times N_P m} $ the diagonal weighting matrix  for the stator voltage increment. For the application of electric drives, reference tracking is significantly more important then the magnitude of the stator voltage.
+\begin{equation*}
+J = \left[\; \boldsymbol{\Bar{i}} [k+1] - \boldsymbol{\Bar{i}}_{ref} [k+1] \; \right]^T \boldsymbol{Q} \left[\; \boldsymbol{\Bar{i}} [k+1] - \boldsymbol{\Bar{i}}_{ref} [k+1]\; \right] + \left(\Deltaub \right)^\T \boldsymbol{R} \Deltaub
+\end{equation*}
+Or with a more compact notation $\wLNorm{x}{I} = \x^\T \I \x$  :
+% + \wLNorm{\Bar{z}}{W_I} + w_{\eta} \eta + \wLNorm{i_N}{W_N}
+\begin{equation}
+	J = \wLNorm{\boldsymbol{\Bar{i}}  - \boldsymbol{\Bar{i}}_{ref} }{Q}  + \wLNorm{\Bar{\boldsymbol{\Delta u}}}{R}
+	\label{equ:2_J}
+\end{equation}
+To express the cost in terms of $\Deltaub$, $\Bar{\bm{i}}[k+1] = \Bar{\bm{g}}[k] + \predDeltaU \Deltaub$ is expressed by the prediction based on $\Sigma: \left[\bm{A}(\omega[k]),\bm{B},\bm{E}(\omega[k])\right]$ according to Equation \eqref{equ:2_prediction}. Inserting this into $\eqref{equ:2_J}$, leads to:
+
+\begin{align*}
+	  \bm{\Gamma} = \left( \predDeltaU \right)^\T  \bm{Q} \predDeltaU  + \bm{R}  & \quad & \bm{\gamma}^\T  = 2\Tilde{\Bar{\bm{e}}}[k]^\T \bm{Q} \predDeltaU
+\end{align*}
+With $\Tilde{\Bar{\bm{e}}}[k] = \Bar{\bm{g}}[k] - \Bar{\bm{r}}[k+1]$ being the prediction of the quasi-tracking error. $\bm{Q}, \bm{R}$ must be chosen in such that $\bm{\Gamma}  \succ 0$.
+
 \subsection{Voltage Constraints}
-\subsection{Current Constraints}
+As mentioned in Section \ref{sec:intro_vsi}, the stator voltage vector $\bm{u}_S^S$ is subject to the constraints of the voltage hexagon spanned by the 6 active vectors. 
+These constraints can be formulated as a set of linear inequality constraints. For example, the upper flat border of the hexagon is described by 
+\begin{equation}
+	u_\beta \le \dfrac{U_{DC}}{\sqrt{3}}
+	\label{equ:constr_Nu1}
+\end{equation}
+and the upper right border, with a slope of $-\pi/3$ by
+\begin{equation}
+	u_\beta \le -{\sqrt{3}} u_\alpha + \dfrac{2\;U_{DC}}{\sqrt{3}}
+	\label{equ:constr_Nu2}
+\end{equation}
+Both of the inequalities \eqref{equ:constr_Nu1} and \eqref{equ:constr_Nu2} describe convex sets. Continuing this construction of the voltage hexagon for all six borders, leads to a sixfold convex intersection of half-planes as in \cite{LMIVHex}, which describes the voltage hexagon. Combining those six relations leads to the Linear Matrix Inequality \eqref{equ:constraint_U_SRF}.
+\begin{equation}
+	\scriptstyle 
+	\underbrace{
+		\begin{bmatrix}
+			\sqrt{3} & 1 \\
+			0 & 1 \\
+			-\sqrt{3} & 1 \\
+			-\sqrt{3} & -1 \\
+			0 & -1 \\
+			\sqrt{3} & -1
+		\end{bmatrix}
+	}_{\bm{N}_u^S}
+	\begin{bmatrix}
+		u_\alpha\\
+		u_\beta
+	\end{bmatrix}
+	\le
+	\underbrace{
+		\dfrac{U_{DC}}{\sqrt{3}}
+		\begin{bmatrix}
+			2\\
+			1\\
+			2\\
+			2\\
+			1\\
+			2
+		\end{bmatrix}
+	}_{\bm{\nu}_u^S}
+	\label{equ:constraint_U_SRF}
+\end{equation}
+
+Using Equation \eqref{equ:constraint_U_SRF}, the voltage constraints in the stator reference frame can be compactly written down as:
+\[
+\bm{N}_u^S{\bm{u}^S_S[k]} \le \bm{\nu^S_u}
+\]
+However, the optimization problem shall be defined with respect to the the rotor reference frame in terms of the incremental stator voltage predictions. To do so, first, the rotation from the RRF is applied to  $\bm{u}_S^R[k] = \bm{\Delta u}_S^R[k] + \bm{u}_S^R[k-1]$ for one  voltage vector.
+\[
+\bm{N}_u^S \ipark\left(\bm{\Delta u}_S^R[k] + \bm{u}_S^R[k-1] \right)\le \bm{\nu^S_u}
+\]
+The next step is to extend that formulation to the incremental prediction vector ${\bm{\Delta u}}_S^R[k] \rightarrow \bar{\bm{\Delta u}}_S^R[k]$. To calculate ${\bm{u}}_S^R[k+1] \dots {\bm{u}}_S^R[k+N_P-1]$ from ${\bm{u}}_S^R[k-1]$ and ${\bm{\Delta u}}_S^R[k+l]$, all the ${\bm{\Delta u}}_S^R[k+l]$ with $l \leq N_P-1$ must be accumulated. Thus, the prediction vector in RRF is multiplied by the lower block-triangular matrix $\bm{P}_T$ with $\mathbf{I}_2$ as block elements.
+\[
+\Bar{\bm{u}}[k] = \bm{P}_T \Deltaub +  (\bm{1}_{N_P} \otimes \bm{I}_2) \bm{u}[k-1]
+\]
+With $ (\bm{1}_{N_P} \otimes \bm{I}_2)$ being the Kronecker product, describing $N_P$ stacked identity matrices. Putting everything together leads to:
+\begin{equation}
+	\Bar{\bm{N}}_u^S \predipark\left(\bm{P}_T \bar{\bm{\Delta u}}_S^R[k] +  (\bm{1}_{N_P} \otimes \bm{I}_2)\bm{u}_S^R[k-1] \right)\le \Bar{\bm{\nu}}^S_u 
+	\label{equ:u_constr_SRF}
+\end{equation}
+
+Or in more detail:
+
+\begin{align*}
+\scriptstyle 
+	\underbrace{
+		\begin{bmatrix}
+			\bm{N}_u^S & \bm{0}^{6 \times 2} & \cdots & \bm{0}^{6 \times 2} \\
+			\bm{0}^{6 \times 2} & \bm{N}_u^S & \cdots & \bm{0}^{6 \times 2} \\
+			\vdots & \vdots & \ddots & \vdots \\
+			\bm{0}^{6 \times 2} & \bm{0}^{6 \times 2} & \cdots & \bm{N}_{u}^S
+		\end{bmatrix}
+	}_{\Bar{\bm{N}}_u^S}
+	\underbrace{
+		\begin{bmatrix}
+			\ipark & \bm{0}_2  & \cdots &   \bm{0}_2 \\
+			\bm{0}_2 & \iparkArg{\varphi[k+1]}   &  \cdots &   \bm{0}_2 \\
+			%\bm{0}_2 & \bm{0}_2 & \iparkArg{\varphi[k+2]}   &  \cdots &   \bm{0}_2 \\
+			\vdots   & \vdots   & \ddots   & \bm{0}_2 \\
+			\bm{0}_2 & \bm{0}_2 &  \cdots & \iparkArg{\varphi[k+N_P-1]}   
+		\end{bmatrix}
+	}_{\predipark}
+	\cdot
+	\\
+	\left(
+	\underbrace{
+		\begin{bmatrix}
+			\bm{I}_2 & \bm{0}_2 & \bm{0}_2 & \cdots & \bm{0}_2 \\
+			\bm{I}_2 & \bm{I}_2 & \bm{0}_2 & \cdots & \bm{0}_2 \\
+			%\bm{I}_2 & \bm{I}_2 & \bm{I}_2 & \ddots & \vdots \\
+			\vdots   & \vdots   & \ddots   &  & \bm{0}_2 \\
+			\bm{I}_2 & \bm{I}_2 & \bm{I}_2 & \cdots & \bm{I}_2
+		\end{bmatrix}
+	}_{\bm{P}_T}
+	\underbrace{
+		\begin{bmatrix}
+			{ \boldsymbol{\Delta u}}[k] \\
+			{ \boldsymbol{\Delta u}}[k+1]\\
+			\vdots\\
+			{ \boldsymbol{\Delta u}}[k+N_P-1]
+		\end{bmatrix}
+	}_{\Bar{\bm{\Delta u}}^R_S[k]}
+	+
+	\begin{bmatrix}
+		\bm{I}_2 \\
+		\bm{I}_2 \\
+		\vdots\\
+		\bm{I}_2
+	\end{bmatrix}
+	\bm{u}_S^R[k-1] 
+	\right)
+	\le
+	\begin{bmatrix}
+		\bm{\nu}^S_u \\
+		\bm{\nu}^S_u \\
+		\vdots\\
+		\bm{\nu}^S_u \\
+	\end{bmatrix}
+	\label{equ:constaintU_full_SRF}
+\end{align*}
+
+As a final step, to arrive at an LMI in terms of $\Deltaub$, Equation \eqref{equ:u_constr_SRF} must be rearranged to:
+\[
+\Bar{\bm{N}}_u^S \predipark \bm{P}_T\bm{\Delta u}_S^R[k]  \le \Bar{\bm{\nu}}^S_u - \Bar{\bm{N}}_u^S \predipark (\bm{1}_{N_P} \otimes \bm{I}_2)\bm{u}_S^R[k-1] 
+\]
+
+%	Oder unter Annahme $\varphi[k] = \varphi[k+l]\;: \; l\in[1, N_P]$,  rechen effizienter:
+%	\begin{equation}
+%		\underbrace{
+%			\bm{P}_T \ipark {\bm{N}}_u^S }_{\bm{M}_u} \bm{\Delta u}_S^R[k]  \le \underbrace{\Bar{\bm{\nu}}^S_u - \Bar{\bm{N}}_u^S (\bm{1}_{N_P} \otimes \bm{I}_2)  \ipark \bm{u}_S^R[k-1]}_{\bm{\mu}_u}
+%		\label{equ:lmi_u}
+%	\end{equation}
+
+
+$\ipark$ is part of the $SO_2$ group (Special-Orthogonal in the plane $\mathbb{R}^2$)  \cite{KaR}. Thus, using the assumption $\omega[k] = \omega[k+l]\;: \; l\in[1, N_P]$ for $\varphi[k+l] = \varphi[k] + l\cdot\omega[k]T_S$ the transformation matrices for future steps can be approximated by the following product:
+\[
+\iparkArg{\varphi[k+l]} =\left(\iparkArgA{\omega[k] T_S} \right)^l \ipark
+\]
+To further reduce the computational burden, the assumption $\omega[k] T_S \le \omega_{max}T_{S,max} \le 0.2$ holds true $\forall k$ of electric drives considered within the scope of this thesis. This allows for small angle approximation.
+\[
+\iparkArgA{\omega[k] T_S} \approx \begin{bmatrix}
+	1 & -\omega[k] T_S\\ \omega[k] T_S & 1 
+\end{bmatrix} := \Tilde{\bm{T}}_{dq\alpha \beta} (\omega[k] T_S)
+\]
+With $\prediparkapproxw$ being an block diagonal matrix of elements $\Tilde{\bm{T}}_{dq\alpha \beta} (\omega[k] T_S)$, the following computational-effective implementation can be written down.
+\begin{equation}
+	\underbrace{ 
+		\Bar{\bm{N}}_u^S \prediparkapproxw \bm{P}_T
+	}_{\bm{M}_u} 
+	\bm{\Delta u}_S^R[k]  \le 
+	\underbrace{
+		\Bar{\bm{\nu}}^S_u- \Bar{\bm{N}}_u^S \prediparkapproxw (\bm{1}_{N_P} \otimes \bm{I}_2)\bm{u}_S^R[k-1] 
+	}_{\bm{\mu}_u}
+	\label{equ:lmi_u}
+\end{equation}
+
+
+\subsection{Begrenzung des Betrag des Stromraumzeiger}
+Der Betrag des Stromraumzeigers darf nicht größer als der zulässige Maximalstrom sein. 
+\begin{equation}
+	\|\bm{i}_S^S\|_2 \le I_{max} \iff \|\bm{i}_S^R\|_2 \le I_{max}
+	\label{equ:constraints_I_sv}
+\end{equation}
+
+Das entspricht auf der komplexen Ebene einem Kreis um den Ursprung. Aufgrund der Rotationssymmetrie dieser Beschränkung ist es äquivalent ob sie in SRF und RRF definiert ist.\\
+Der Kreis wird durch ein Oktagon angenähert, um eine Beschränkung in Form von Matrixungleichungen zu erhalten. Alternative Ansätze wären $\varphi$-variante lokale Approximation des Kreises durch die Schnittmenge von zwei Halbebenen wie in \cite{TOMPFC1}.\\
+Analog wie in Gleichung \eqref{equ:constraint_U_SRF}, lässt sich ein Oktagon folgendermaßen definieren:
+
+\[
+\scriptstyle
+\underbrace{
+	\begin{bmatrix}
+		1 & \frac{1-c}{c} \\
+		\frac{1-c}{c} & 1 \\
+		-\frac{1-c}{c} & 1 \\
+		-1 & \frac{1-c}{c} \\
+		-1 & -\frac{1-c}{c} \\
+		-\frac{1-c}{c} & -1 \\
+		\frac{1-c}{c} & -1 \\
+		1 & -\frac{1-c}{c}
+	\end{bmatrix}
+}_{\mathbf{N}_i^R}
+\begin{bmatrix}
+	i_{d} \\
+	i_{q}
+\end{bmatrix}
+\le
+\underbrace{
+	\begin{bmatrix}
+		I_{max} \\
+		I_{max} \\
+		I_{max} \\
+		I_{max} \\
+		I_{max} \\
+		I_{max} \\
+		I_{max} \\
+		I_{max}
+	\end{bmatrix}
+}_{\bm{\nu}_i^R}
+\]
+Mit $c = \cos{\pi/4}$. Die Beschränkung soll für den Raumzeiger $\bm{i}^R_S[k+1]$ gelten, also die Reaktion auf die aktuelle Stellgröße $\bm{u}^R_S[k]$. 
+\[
+\bm{N}_i^R{\bm{i}^R_S[k+1]} \le \bm{\nu^R_i}
+\]
+Die Ungleichung muss in Stellgrößeninkrementen ausgedrückt werden. Dazu wird $\bm{i}^R_S[k+1]$ mittels Systemgleichung $\Sigma: \left[\bm{A}(\omega[k]),\bm{B},\bm{E}(\omega[k])\right]$ ausgedrückt. Mit inkrementeller Stellgröße $\bm{u}^R_S[k] = \bm{u}^R_S[k-1] + \bm{\Delta u}^R_S[k]$
+\[
+\bm{N}_i^R \left(\bm{A}(\omega[k])\bm{i}^R_S[k]+\bm{B}\left( \bm{u}^R_S[k-1] + \bm{\Delta u}^R_S[k] \right)+\bm{E}(\omega[k])\right)\le \bm{\nu^R_i}
+\]
+Für die Prädiktion aus Gleichung \eqref{equ:prediction}, ergibt sich somit für den Prädiktionsvektor $\Deltaub$.
+\[
+\Bar{\bm{N}}_i^R \left(\Bar{\bm{g}}[k]+ \predDeltaU(\omega[k]) \Bar{\bm{\Delta u}}^R_S[k] \right)\le \bm{\Bar{\nu}}^R_i
+\]
+
+oder ausgeschrieben:
+
+\begin{align*}
+	\small
+	&
+	\underbrace{
+		\begin{bmatrix}
+			\bm{N}_i^R & \bm{0}^{8\times2} & \cdots & \bm{0}^{8\times2}\\
+			\bm{0}^{8\times2} & \bm{N}_i^R & \cdots & \bm{0}^{8\times2}\\
+			\vdots & \vdots & \ddots & \vdots\\
+			\bm{0}^{8\times2} & \bm{0}^{8\times2} & \cdots & \bm{N}_i^R
+		\end{bmatrix}
+	}_{\Bar{\bm N}_i^R}
+	\left(
+	\underbrace{
+		\begin{bmatrix}
+			\bm g[k]\\
+			\bm g[k+1]\\
+			\vdots\\
+			\bm g[k+N_P-1]
+		\end{bmatrix}
+	}_{\Bar{\bm g}[k]}
+	+
+	\predDeltaU(\omega[k])
+	\underbrace{
+		\begin{bmatrix}
+			\Delta\bm u[k]\\
+			\Delta\bm u[k+1]\\
+			\vdots\\
+			\Delta\bm u[k+N_P-1]
+		\end{bmatrix}
+	}_{\Bar{\bm{\Delta u}}_S^R[k]}
+	\right)
+	\le
+	\underbrace{
+		\begin{bmatrix}
+			\bm{\nu}_i^R\\
+			\bm{\nu}_i^R\\
+			\vdots\\
+			\bm{\nu}_i^R
+		\end{bmatrix}
+	}_{\Bar{\bm{\nu}}_i^R}
+\end{align*}
+Umgeformt auf die inkrementelle Stellgröße ergibt sich die Nebenbedingung fpr das Optimierungsproblem:
+\[
+\underbrace{\Bar{\bm{N}}_i^R\predDeltaU}_{\bm{M}_i} \Bar{\bm{\Delta u}}^R_S[k] \le \underbrace{\bm{\Bar{\nu}}^R_i - \Bar{\bm{N}}_i^R \Bar{\bm{g}[k]}}_{\bm{\mu}_i}
+\]
+
 \subsubsection{Parameter-Varying Constraints}
 \subsection{Quadratic Program Formulation}
 \subsection{Solver}
 
-\section{Analysis of the Controller Structure}
+\section{MPC Formulations}
+\subsection{Basic MPC}\label{sec:mpcc_mpc_basic}
+The prediction according to Equation \eqref{equ:2_prediction} uses absolute states $\x [k]$ and differential actuating signal $ \bm{\Delta u}[k] = \bm{u}[k]-\bm{u}[k-1] $. This enables the utilization of a commonly used MPC structure, as described in % TODO: ref to OaC book section 2.3
+Section \ref{sec:mpcc_analysis} provides an analysis on why this approach does not inherently guarantee offset-free tracking, but can be extended  by using the approach discussed in Section \ref{sec:mpcc_ext_is}.
+ 
+\subsection{MPC with Embedded Integrator}\label{sec:mpcc_mpc_wang}
+A different approach is used by % TODO cite wang
+where the state space system is augmented, such that the states and the actuating signals are incremental.
+
+Applying this to the description of the discrete time model of PMSM \eqref{equ:2_apv_tk}, one obtains the augmented system:
+
+Apart from the ambiguity regarding $\Tilde{{\Delta \omega}}$, implementing the constraints with the incremental quantities for $\Aw$ and $\Ew$ proved to be complicated.
+
+As it will be shown in Section \ref{sec:mpcc_analysis}, this leads to integrating behavior, but comes with the downsides of incremental states.
+
+\subsection{Hybrid Approach}\label{sec:mpcc_mpc_hybrid}
+Since the basic MPC formulation does not inherently gurantee offset-free tracking under output disturbances, such as model faults and the embedded integrator according to Wang hinders extensions and constraint formulations due to its incremental states, a way searched to combine the benefits of those two approaches. \\
+To obtain an MPC using absolute states $\x[k] = [i_{Sd}\; i_{Sq}]^\T$
+
+\section{Analysis of the Controller Structure}\label{sec:mpcc_analysis}
 \subsection{Closed-Loop Structure with inactive Constraints}
 \subsection{Closed-Loop Structure with active Constraints}
 \subsection{Prediction Error Propagation}
@@ -111,7 +572,7 @@ Thus, it was decided to use the affine prediction of Equation \eqref{equ:2_apv_s
 
 \section{Extensions}
 \subsection{Deadtime Compensation}
-\subsection{Integral State Augmentation for the Basic MPC}
+\subsection{Integral State Augmentation for the Basic MPC} \label{sec:mpcc_ext_is}
 \subsubsection{Windup}
 \subsection{Soft Constraints}
 
@@ -120,13 +581,16 @@ Thus, it was decided to use the affine prediction of Equation \eqref{equ:2_apv_s
 \subsection{Step Response}
 \subsection{Constrained Operation}
 
-\section{Comparison of the MPC Approaches}
+\section{Comparison of the MPC Approaches}\label{sec:mpcc_comp}
 \subsection{Steady State Behavior}
 \subsection{Timing Uncertainties}
 \subsection{Constrained Operation}
 \subsection{Computational Effort}
 
 \section{Discussion}
+
+Analyzing  $\Sigma: \left(\bm{A}_c(\omega(t)),\Tilde{\bm{B}}_c \right)$ in the context of linear parameter-varying systems, the framework of LPV System according to %TODO: cite Briat
+one has to quantify the influence of the parameter $\omega$. Due to the balance of angular momentum of the motor shaft \eqref{equ:1_coupling}, the electrical rotor speed $\omega = \omega_e = \omega_{m1}p$ is Lipschitz-continuous. With the eigenvalues of the respective dynamical system \eqref{equ:1_coupling} being slower than \eqref{equ:2_apv_ss}, as discussed in Section \ref{sec:model_coupling}.
 
 
 
