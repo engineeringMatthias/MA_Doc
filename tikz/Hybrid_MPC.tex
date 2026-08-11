@@ -1,0 +1,65 @@
+\begin{tikzpicture}
+	\node[draw, align=center, minimum width=105pt, minimum height=29pt] (node1) at (0.5,3) {
+		$\Delta u^* = \arg\min J$ \\ 
+		$\text{s.t. } x \in \mathbb{X} \; u \in \mathbb{U}$
+	};
+	\node[draw] (node2) at (3.93,3) {$\frac{z}{z-1}$};
+	\draw[->] (node1.east) -- (node2.west);
+	\node[draw] (node7) at (5.5,3) {S};
+	\node[draw, align=center] (node8) at (7.29,3) {
+		$\dot{x}=f(x,u)$\\
+		$y=h(x)$};
+	\draw (-1.08,1.5) circle (0.08cm);
+	\node[draw] (node3) at (5.33,1.51) {$z^{-1}$};
+	\node[draw] (node4) at (6.77,1.51) {H};
+	\node[draw, shape=isosceles triangle, minimum height=0.82cm, rotate=180] (node5) at (-0.03,1.5) {};
+	\node[draw, shape=isosceles triangle, minimum height=0.82cm, rotate=180] (node6) at (-0.03,0.5) {};
+	\node at (-0.1,1.51) {$P_{u}$};
+	\node at (1.01,1.75) {$\tilde{u}[k-1]$};
+	\node at (-0.04,0.48) {$P_{x}$};
+	\draw[->] (node5.east) -- (-1,1.5);
+	\draw[->] (node2.east) -- (node7.west);
+	\draw[->] (node7.east) -- (node8.west);
+	\node at (4.82,0.73) {$x[k]$};
+	\node at (-0.5,2.01) {$\tilde{\bar{g}}[k]$};
+	\node (node9) at (4.81,3.39) {$u[k]$};
+	\node at (2.93,3.38) {$\Delta u[k]$};
+	\draw[fill=black] (6.2,1.51) circle (0.05cm);
+	\draw[fill=black] (3.3,0.5) circle (0.05cm);
+	\draw[fill=black] (1.7,0.5) circle (0.05cm);
+	\node (node10) at (-2.16,3.33) {$\bar{r}[k+1]$};
+	\draw[->] (-2.58,3) -- (node1.west);
+	\node at (7.29,3.88) {Plant};
+	
+	
+	
+	\draw[->] (-1.08,1.58) -- (-1.08,2.45);
+	\draw[->] (1.7,0.51) -- (1.69,2.45);
+	
+	\draw (3.28,1.51) circle (0.1cm);
+	\draw[->] (0.5,4) -- (node1.north);
+	
+	\node at (1.21,3.93) {${u}[k-1]$};
+	
+	\node[draw, shape=isosceles triangle, minimum height=0.82cm, rotate=180] (node11) at (4.3,1.51) {};
+	\node at (4.22,1.51) {$A$};
+	
+	\node[draw] (node12) at (2.38,1.51) {$B^{-1}$};
+	
+	\draw[->] (node8.south) -- (7.29,1.51) -- (node4.east);
+	\draw[->] (node4.west) -- (node3.east);
+	\draw[->] (node11.east) -- (3.38,1.51);
+	
+	\draw[->] (6.2,1.51) -- (6.2,0.5) -- (node6.west);
+	
+	\draw[->] (node3.west) -- (node11.west);
+	
+	\draw[->] (3.18,1.51) -- (node12.east);
+	\draw[->] (3.29,0.5) -- (3.29,1.41);
+	
+	\draw[->] (node12.west) -- (node5.west);
+	
+	\draw[->] (node6.east) -- (-1.08,0.5) -- (-1.08,1.42);
+	
+	\node at (3.54,1.36) {-};
+\end{tikzpicture}
