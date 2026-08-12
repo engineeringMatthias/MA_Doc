@@ -12,25 +12,26 @@
 	\draw[->] (node2.east) -- (node7.west);
 	\draw[->] (node7.east) -- (node8.west);
 	\node (node9) at (4.81,3.39) {$u[k]$};
-	\node at (2.93,3.38) {$\Delta u[k]$};
+	\node at (2.93,3.38) {$\Delta u[k]$};\node at (1.22,3.95) {$u[k-1]$};
 	\node (node10) at (-2.16,3.33) {$\bar{r}[k+1]$};
 	\draw[->] (-2.58,3) -- (node1.west);
 	\node at (7.29,3.88) {Plant};
 	
 	
 	
-  \node[draw] (node4) at (3.18,1.78) {$1-z^{-1}$};
-  \node[draw] (node3) at (5.5,1.78) {H};
-
-  \draw[->] (node8.south) -- (7.29,1.78) -- (5.75,1.78);
-  \draw[->] (node3.west) -- (node4.east);
-  \draw[fill=black] (4.56,1.78) circle (0.08cm);
-
-  \draw[->] (node4.west) -- (0.8,1.78) -- (0.8,2.45);
-
-  \draw[->] (4.56,1.78) -- (4.56,1) -- (-1,1) -- (-1,2.45);
-
-  \node at (1.71,2.06) {$\Delta x[k]$};
-
-  \node at (0.5,1.33) {$x[k]$};
+	\node[draw] (node4) at (3.18,1.78) {$1-z^{-1}$};
+	\node[draw] (node3) at (5.5,1.78) {H};
+	
+	\draw[->] (node8.south) -- (7.29,1.78) -- (5.75,1.78);
+	\draw[->] (node3.west) -- (node4.east);
+	\draw[fill=black] (4.56,1.78) circle (0.08cm);
+	
+	\draw[->] (node4.west) -- (0.8,1.78) -- (0.8,2.45);
+	
+	\draw[->] (4.56,1.78) -- (4.56,1) -- (-1,1) -- (-1,2.45);
+	
+	\node at (1.71,2.06) {$\Delta x[k]$};
+	
+	\node at (0.5,1.33) {$x[k]$};
+	\draw[->] (0.5,4.12) -- (node1.north);
 \end{tikzpicture}

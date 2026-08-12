@@ -269,7 +269,7 @@ Since the controller operates within the RRF, the relation for the voltage const
 	 \end{bmatrix}}_{\bm{\mu}}
  \label{equ:2_QP}
 \end{align}
-with the Hessian of the cost function being positive definite $\nabla^2 J = \bm{\Gamma}  \succ 0 $ to ensure convexity.
+with the Hessian of the cost function being positive definite $\nabla_{\Deltaub}^2 J = \bm{\Gamma}  \succ 0 $ to ensure convexity.
 
 \subsection{Cost Function}
 For the cost function $J$, a simple LQR-style base cost is employed. With $\bm{Q} \in \mathbb{R}^{N_P q\times N_P q}$ as the diagonal weighting matrix for the tracking error and $\bm{R} \in \mathbb{R}^{N_P m\times N_P m} $ the diagonal weighting matrix  for the stator voltage increment. For the application of electric drives, reference tracking is significantly more important then the magnitude of the stator voltage.
@@ -567,12 +567,12 @@ The prediction according to Equation \eqref{equ:2_prediction} uses absolute stat
 	\caption{MPC structure used in \cite{mpcCamacho} with the notation used in this thesis}
 	\label{fig:OaC_MPC}
 \end{figure}
-The MPC is provided with a reference prediction $\bar{\bm{r}}[k+1] = \left[ \bm{r}[k+1]\; \bm{r}[k+2] \; \hdots \bm{r}[k+N_P] \right]^\T$. Using current states and the previous input, the auxiliary prediction vector $\Bar{\bm{g} [k]}$ can be computed according to Equation \ref{equ:2_prediction}. Using $\Tilde{\Bar{\bm{e}}}[k] = \Bar{\bm{g}}[k] - \Bar{\bm{r}}[k+1]$ to calculate the linear term $\bm{\gamma}$ of the quadratic program, the cost function $J = \wLNorm{\Delta u}{\Gamma} + \bm{\gamma^T} \Deltaub$ is fully determined. To determine the constraints $\bm{M} \Deltaub \le \bm{\mu}$, the measured state vector and previous input are required. The output of the Quadratic Program \eqref{equ:2_QP} is the incremental input $\Deltaub$, which is accumulated then  to $\bm{u}[k]$. The interface to the plant is modeled as Sample and Hold elements. \\
+The MPC is provided with a reference prediction $$\bar{\bm{r}}[k+1] = \left[ \bm{r}^\T[k+1]\; \bm{r}^\T[k+2] \; \hdots \bm{r}^\T[k+N_P] \right]^\T$$. Using current states and the previous input, the auxiliary prediction vector $\Bar{\bm{g} [k]}$ can be computed according to Equation \ref{equ:2_prediction}. Using $\Tilde{\Bar{\bm{e}}}[k] = \Bar{\bm{g}}[k] - \Bar{\bm{r}}[k+1]$ to calculate the linear term $\bm{\gamma}$ of the quadratic program, the cost function $J = \wLNorm{\Delta u}{\Gamma} + \bm{\gamma^T} \Deltaub$ is fully determined. To determine the constraints $\bm{M} \Deltaub \le \bm{\mu}$, measured state vector and previous input are required. The output of the Quadratic Program \eqref{equ:2_QP} is the incremental input $\Deltaub$, which is accumulated then  to $\bm{u}[k]$. The interface to the plant is modeled as Sample and Hold elements. \\
 Section \ref{sec:mpcc_analysis} provides an analysis on why this approach does not inherently guarantee offset-free tracking, but can be extended  by using the approach discussed in Section \ref{sec:mpcc_ext_is}.
  
 \subsection{MPC with Embedded Integrator}\label{sec:mpcc_mpc_wang}
-A different approach is used by L. Wang \cite{mpcWang}. Here, the state space system is augmented, such that the states and the actuating signals are incremental. As it will be shown in Section \ref{sec:mpcc_analysis}, this ensures the MPC is of integrating behavior for locally unconstrained operation. \\
-For discrete-time, linear time-invariant systems $\Sigma: \left[\bm{A}, \bm{B}, \bm{C} \right]$, the incremental states and inputs are defined as:
+A different approach is used by L. Wang \cite{mpcWang}. Here, the state space system is augmented, such that the states and actuating signals are incremental. As it will be shown in Section \ref{sec:mpcc_analysis}, this ensures the MPC is of integrating behavior for locally unconstrained operation. In this thesis a brief overview of the derivation of the augmented state space model is given. For more details, refer to Section 1.2 of the MPC Book by Wang \cite{mpcWang}.\\
+For discrete-time, linear time-invariant systems, without feedthrough term $\Sigma: \left[\bm{A}, \bm{B}, \bm{C} \right]$, the incremental states and inputs are defined as:
 \begin{align*}
 \bm{\Delta x}[k]  = \x[k] - \x[k-1] & \quad & \bm{\Delta u}[k] = \bm{u}[k] - \bm{u}[k-1] 
 \end{align*}
@@ -615,7 +615,9 @@ In order to predict the absolute state or output $\bm{y}$, an additional state i
 Applying this to the description of the affine, parameter-varying discrete time model used for the PMSM \eqref{equ:2_apv_tk}, one has to take especially care for the the $\omega$-varying terms:
 
 \begin{align*}
-	\Sigma&: \left[\bm{A}(\omega[k]),\bm{B},\bm{E}(\omega[k])\right] - \Sigma:  \left[\bm{A}(\omega[k-1]),\bm{B},\bm{E}(\omega[k-1])\right] = \\
+	\Sigma_{k+1}&: \left[\bm{A}(\omega[k]),\bm{B},\bm{E}(\omega[k])\right] - \Sigma_k:  \left[\bm{A}(\omega[k-1]),\bm{B},\bm{E}(\omega[k-1])\right] = \\
+	\x[k+1] - \x[k] &= \left( \Aw \left(\x[k-1] + \bm{\Delta x}[k] \right)+ \B \bm{u}[k] + \Ew  \right) \\
+	& - \left(\bm{A}(\omega[k-1])\x[k-1] + \B \bm{u}[k-1] + \bm{E}(\omega[k-1]) \right) \\
 	\bm{\Delta x}[k+1] &= \Aw \bm{\Delta x}[k] + \B \cdot \bm{\Delta u}[k] + \underbrace{\bm{\Delta A}(\Delta \omega[k]) \x[k-1] + \bm{\Delta E}(\Delta \omega[k])}_{\bm{F}[k]} \\
 \end{align*}
 with
@@ -686,6 +688,8 @@ Applying the incremental state accumulation as in Equation \eqref{equ:2_augmente
 
 Apart from the ambiguity regarding ${{\Delta \omega}}$, implementing constraints with incremental quantities for $\Aw$ and $\Ew$ proved to introduce additional complexity.\\
 
+For the implementation of this augmented system, one has to obtain the incremental state change $\bm{\Delta x} [k] $. This is accomplished by the filter $1-z^{-1}$. To calculate the constraints and tracking error, $u[k-1]$ and $x[k]$ are needed. This results into the controller structure shown in Figure \ref{fig:Wang_MPC}.
+
 \begin{figure}[H]
 	\centering
 	\include{tikz/Wang_MPC.tex}
@@ -696,18 +700,194 @@ Apart from the ambiguity regarding ${{\Delta \omega}}$, implementing constraints
 The advantage of this approach, which introduces integrating behavior, is accompanied by the disadvantages of incremental states.
 
 \subsection{Hybrid Approach}\label{sec:mpcc_mpc_hybrid}
-Since the basic MPC formulation does not inherently gurantee offset-free tracking under output disturbances, such as model faults and the embedded integrator according to Wang hinders extensions and constraint formulations due to its incremental states, a way searched to combine the benefits of those two approaches. \\
-To obtain an MPC using absolute states $\x[k] = [i_{Sd}\; i_{Sq}]^\T$
-
+Since the basic MPC formulation does not inherently guarantee offset-free tracking under output disturbances, such as model faults and the embedded integrator according to Wang hinders extensions and constraint formulations due to its incremental states, a way searched to combine the benefits of those two approaches. \\
+To obtain an MPC using absolute states $\x[k] = [i_{d}\; i_{q}]^\T$ and still having no direct feedback for $\bm{u}[k-1]$ for the locally unconstrained controller, like in the Embedded Integrator structure of, a hybrid structure of these two approaches was designed. The result is depicted in Figure \ref{fig:Hybrid_MPC}.
+\\
+The idea behind this structure is to use the state description to estimate what input $\Tilde{{\bm{u}}}[k-1]$ was applied to the plant such that it leads to the measured states $x[k]$. By doing so, input disturbances $\bm{d}_1[k-1] = \Tilde{{\bm{u}}}[k-1] - {{\bm{u}}}[k-1]$ are considered. 
+\begin{equation*}
+	\begin{split}
+		\bm{x}[k]
+		&= \bm{A}\bm{x}[k-1]
+		+ \bm{B}
+		\underbrace{
+			\left(
+			\bm{d}_1[k-1] + \bm{u}[k-1]
+			\right)
+		}_{\tilde{\bm{u}}[k-1]}
+		\\
+		\tilde{\bm{u}}[k-1]
+		&= \bm{B}^{-1}
+		\left(
+		\bm{x}[k] - \bm{A}\bm{x}[k-1]
+		\right).
+	\end{split}
+\end{equation*}
 \begin{figure}[H]
 	\centering
 	\include{tikz/Hybrid_MPC.tex}
 	\caption{Hybrid MPC structure for LTI systems}
 	\label{fig:Hybrid_MPC}
 \end{figure}
+Generally speaking, the inverse $\bm{B}^{-1}$ is not guaranteed to exist. However, in the case of the PMSM model used \eqref{equ:2_apv_tk}, $\B$ is a diagonal matrix with positive elements. With $L_d,\; L_q$ being in the range of $[0.1, 10]$ mH, $\B$ is well conditioned.\\
+For the affine, parameter-varying prediction model $\Ew$ has to be considered as well:
+\[
+\tilde{\bm{u}}[k-1] = \bm{B}^{-1} \left( \bm{x}[k] - \bm{A}(\omega[k-1])\bm{x}[k-1] - \bm{E}(\omega[k-1]) \right).
+\]
+The dynamic behavior of this approach will be analyzed and compared to the other two formulations in the Section \ref{sec:mpcc_analysis}.
 
 \section{Analysis of the Controller Structure}\label{sec:mpcc_analysis}
+Ziel: Integrales Verhalten und Sprungfähigkeit analysieren
 \subsection{Closed-Loop Structure with inactive Constraints}
+For the unconstrained case, the  Quadratic Program can be solved offline by finding the stationary points of $J$ with respect to $\Deltaub$:
+
+\begin{align*}
+	\nabla_{\Deltaub} J &= \bm{\Gamma}\Deltaub + \bm{\gamma} = 0 \\
+		{\bm{\Delta u}}^* [k] &= -\bm{\Gamma}^{-1} \bm{\gamma}
+\end{align*}
+With $ \nabla_{\Deltaub}^2 J = \bm{\Gamma}  \succ 0 $ ensuring the stationary point to be a minimizer and $\bm{\Gamma}  \succ 0$ is ensured by the choice of $\bm{Q, R}$.\\
+
+In Model predictive Control only the first actuating signal is applied, thus the linear control law $\Deltaub =\bm{K}{\Bar{\bm{e}}}[k])$ can be written as the following  relation 
+\begin{align}
+	{\bm{\Delta u}} [k]& = -[\bm{I}\; \bm{0} \hdots \bm{0}]\bm{\Gamma}^{-1} \bm{\gamma} \\
+	&= -\underbrace{[\bm{I}\; \bm{0} \hdots \bm{0}] (\predDeltaU^T \bm{Q} \predDeltaU + \bm{R)^{-1}}\predDeltaU \bm{Q}}_{\bm{K}} \Bar{\Tilde{\bm{e}}}[k] \\
+	%&= \underbrace{}_{\bm{K}} \Bar{\Tilde{\bm{e}}}[k]\\
+	{\bm{\Delta u}}[k]&= -\bm{K} \Bar{\Tilde{\bm{e}}}[k] 
+	\label{equ:2_solve_uc_qp}
+\end{align}
+
+\subsubsection{Unconstrained Basic MPC for LPV Systems}
+
+
+\subsubsection{Unconstrained Hybrid MPC for LPV Systems}
+To improve the readability of this section, the parameter dependencies $\omega$ are not explicitly stated.\\
+The reconstructed plant input is defined by Equation \eqref{equ:2_mpcc_ukt}.
+\begin{equation}
+	\tilde{\bm{u}}[k-1] = \bm B^{-1} \left( \bm x[k]-\bm A\bm x[k-1] \right)
+	\label{equ:2_mpcc_ukt}
+\end{equation}
+The control law is linear in terms of the quasi-tracking error with the optimal control gain $\bm{K}$ according to Equation \eqref{equ:2_solve_uc_qp}.
+\[
+\Delta\bm u[k]
+=
+-\bm K\tilde{\bm e}[k]
+\]
+
+%With $\bm u[k] = \bm u[k-1]+\Delta\bm u[k] $, this can be written as
+The accumulated plant input is then given by
+\begin{equation}
+	\bm u[k]
+	=
+	\bm u[k-1]+\bm K\tilde{\bm e}[k]
+	\label{equ:2_hyb_u_accum}
+\end{equation}
+
+Using $\tilde{\bm e}[k]=\bar{\bm r}[k+1]-\bm \tilde{\bm{g}}[k]$, Equation \eqref{equ:2_hyb_u_accum} can be expanded to:
+\begin{align*}
+	\bm u[k]
+	&=
+	\bm u[k-1]
+	-\bm K
+	\left(
+	\bar{\bm r}[k+1]
+	-\bm P_u
+	\left(
+	\bm B^{-1}
+	\left(
+	\bm x[k]-\bm A\bm x[k-1]
+	\right)
+	\right)
+	+\bm P_x\bm x[k]
+	\right)
+	\\[2mm]
+	&=
+	\bm u[k-1]
+	-\bm K\bm P_u\bm B^{-1}\bm x[k-1]
+	-\bm K\bar{\bm r}[k+1]
+	+\bm K\bm P_u\bm B^{-1}\bm x[k]
+	+\bm K\bm P_x\bm x[k].
+\end{align*}
+
+After introducing a shift register for $\x[k-1]$, this can be written in matrix notation
+
+\begin{align}
+		\begin{bmatrix}
+		\bm u[k]\\
+		\bm x[k]
+	\end{bmatrix}
+	=
+	\begin{bmatrix}
+		\bm I & -\bm K\bm P_u\bm B^{-1}\bm A\\
+		\bm 0 & \bm 0
+	\end{bmatrix}
+	\begin{bmatrix}
+		\bm u[k-1]\\
+		\bm x[k-1]
+	\end{bmatrix}
+	+
+	\begin{bmatrix}
+		-\bm K &
+		\bm K\left(\bm P_u\bm B^{-1}+\bm P_x\right)
+		\\
+		\bm 0 & \bm I
+	\end{bmatrix}
+	\begin{bmatrix}
+		\bar{\bm r}[k+1]\\
+		\bm x[k]
+	\end{bmatrix}
+	\label{equ:2_hyb_mpc_ss}
+\end{align}
+
+This is represented by the Diagram \ref{fig:Hybrid_MPC_unconstrained}.
+
+
+\begin{figure}[H]
+	\centering
+	\include{tikz/Hybrid_MPC_unconstrained.tex}
+	\caption{Unconstrained Hybrid MPC structure for LPV systems}
+	\label{fig:Hybrid_MPC_unconstrained}
+\end{figure}
+
+For that system, the measured states $\bm{u}_{C,h} = x[k]$ act as input to the controller and the stator voltage as output $\bm{y}_{C,h}[k] = \bm{u}[k]$. To derive a state space formulation the state vector is defined as the following $\bm{\xi_{C,h}}^T = [\bm{u}\; \bm{x}]$, $\bm{u}[k-1]$. 
+\begin{align}
+	\begin{bmatrix}
+		\bm{u}[k] \\\bm{x}[k]
+	\end{bmatrix} &= 
+	\underbrace{
+		\begin{bmatrix}
+			\bm{I} & -\bm{K} \bm{P}_u(\omega[k]) \bm{B}^{-1} \bm{A}(\omega[k-1]) \\
+			\bm{0} & \bm{0}
+	\end{bmatrix}}_{\bm{A}_{C,h}}
+	\begin{bmatrix}
+		\bm{u}[k-1] \\\bm{x}[k-1]
+	\end{bmatrix} + \\ & \hspace{3cm}
+	\underbrace{
+		\begin{bmatrix}
+			-\bm{K} & \bm{K}\left(\bm{P}_u(\omega[k]) \bm{B}^{-1} +  \bm{P}_x(\omega[k]) \right) \\
+			 \bm{0} & \bm{I} 
+	\end{bmatrix}}_{\bm{B}_{C,h}}
+	\begin{bmatrix}
+		\bar{\bm r}[k+1]\\
+		\bm x[k]
+	\end{bmatrix}
+	\\
+	\bm{y}_{C,h}[k] &= [\bm{I} \; \bm{0}] \cdot \bm{A}_{C,h} \cdot \bm{\xi}[k]+ [\bm{I} \; \bm{0}] \cdot \bm{B}_{C,h} \cdot \bm{x}[k] = \bm{u}[k]
+	\label{equ:2_ss_hyb_mpc}
+\end{align}
+According to the LPV State Space Model \eqref{equ:2_ss_hyb_mpc}, the system matrix $\bm{A}_{C,h}$ is an upper block-triangular matrix. Thus the eigenvalues are on the main diagonal of it. Since those entries are constant, the spectrum of this system matrix is given by
+\begin{equation*}
+\sigma \left( \bm{A}_{C,h} \right) = \{1, 1, 0, 0\} 
+\end{equation*}
+With two discrete-time eigenvalues at one, it can be said, that this controller is of intergrating behavior. \\
+By deriving the transfer function matrix $\bm{\xi} \rightarrow \bm{u}$ for frozen parameter $\omega = \omega_l$ , the frequency response can be analyzed. 
+\[
+ \bm{G}_{\xi u}\big|_{\omega_l} = \bm{C}_{C,h}\big|_{\omega_l}  \left(z \I - \bm{A}_{C,h}\big|_{\omega_l}  \right)^{-1}\bm{B}_{C,h} + \bm{D}_{C,h}
+\]
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.95\linewidth]{Figs/2_hyb_mpc_mimo_tfs}
+	\caption{Frequency response for the unconstrained Hybrid MPC.}
+	\label{fig:2_hyb_mpc_mimo_tfs}
+\end{figure}
 \subsection{Closed-Loop Structure with active Constraints}
 \subsection{Prediction Error Propagation}
 \subsection{Integral Behavior}

@@ -1,0 +1,54 @@
+\begin{tikzpicture}
+	\node[draw] (node2) at (3.93,3) {$\frac{z}{z-1}$};
+
+	\draw (-1.08,1.5) circle (0.08cm);
+	\node[draw, shape=isosceles triangle, minimum height=0.82cm, rotate=180] (node5) at (-0.03,1.5) {};
+	\node[draw, shape=isosceles triangle, minimum height=0.82cm, rotate=180] (node6) at (-0.03,0.5) {};
+	\node at (-0.1,1.51) {$P_{u}$};
+	\node at (2.39,1.77) {$u[k-1]$};
+	\node at (-0.04,0.48) {$P_{x}$};
+	\draw[->] (node5.east) -- (-1,1.5);
+	\node (node4) at (5.71,0.82) {$x[k]$};
+	\node at (-1.47,2.3) {
+${\bar{g}}[k]$};
+	\node (node9) at (5.71,3.32) {$u[k]$};
+	\node at (2.77,3.39) {$\Delta u[k]$};
+	\node (node1) at (1.52,3.69) {$\scriptstyle\omega[k]$};
+	\draw[fill=black] (4.85,3) circle (0.05cm);
+	\node (node10) at (-2.16,3.33) {$\bar{r}[k+1]$};
+
+	
+	
+	
+	\draw[->] (-1.08,1.58) -- (-1.08,2.9);
+	
+	\draw[->] (node6.east) -- (-1.08,0.5) -- (-1.08,1.42);
+	
+
+  \node at (1.07,2.98) {$K$};
+
+  \node[draw, shape=isosceles triangle, minimum height=32pt] (node13) at (0.96,2.99) {};
+
+  \draw (-1.08,3) circle (0.1cm);
+
+  \node at (-0.8,2.68) {-};
+  \draw[->] (node13.east) -- (node2.west);
+  \draw[->] (-0.98,3) -- (node13.west);
+  \draw[->] (-2.5,3) -- (-1.18,3);
+
+  \node (node14) at (0,2.18) {$\scriptstyle\omega[k]$};
+  \node (node15) at (0,-0.12) {$\scriptstyle\omega[k]$};
+
+  \draw[->] (-0.31,2.2) -- (-0.31,1.67);
+
+  \draw[->] (1.23,3.79) -- (1.23,3.26);
+
+  \node at (-0.01,3.36) {$\tilde{\bar{e}}[k]$};
+  \draw[->] (-0.3,-0.2) -- (-0.3,0.34);
+  \draw[->] (node2.east) -- (5.77,3);
+  \node[draw] (node3) at (3.88,1.5) {$z^{-1}$};
+  \draw[->] (node3.west) -- (node5.west);
+
+  \draw[->] (4.85,3) -- (4.86,1.5) -- (node3.east);
+  \draw[->] (node4.south) -- (node6.west);
+\end{tikzpicture}
