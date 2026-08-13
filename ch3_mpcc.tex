@@ -746,47 +746,115 @@ For the unconstrained case, the  Quadratic Program can be solved offline by find
 \end{align*}
 With $ \nabla_{\Deltaub}^2 J = \bm{\Gamma}  \succ 0 $ ensuring the stationary point to be a minimizer and $\bm{\Gamma}  \succ 0$ is ensured by the choice of $\bm{Q, R}$.\\
 
-In Model predictive Control only the first actuating signal is applied, thus the linear control law $\Deltaub =\bm{K}{\Bar{\bm{e}}}[k])$ can be written as the following  relation 
+In model predictive control only the first signal of the computed optimal input prediction is applied, thus the locally unconstrained  linear control law $\Deltaub =\bm{K}{\Bar{\bm{e}}}[k])$ can be written as  Relation \eqref{equ:2_solve_uc_qp}.
 \begin{align}
-	{\bm{\Delta u}} [k]& = -[\bm{I}\; \bm{0} \hdots \bm{0}]\bm{\Gamma}^{-1} \bm{\gamma} \\
-	&= -\underbrace{[\bm{I}\; \bm{0} \hdots \bm{0}] (\predDeltaU^T \bm{Q} \predDeltaU + \bm{R)^{-1}}\predDeltaU \bm{Q}}_{\bm{K}} \Bar{\Tilde{\bm{e}}}[k] \\
-	%&= \underbrace{}_{\bm{K}} \Bar{\Tilde{\bm{e}}}[k]\\
-	{\bm{\Delta u}}[k]&= -\bm{K} \Bar{\Tilde{\bm{e}}}[k] 
+	\bm{\Delta u} [k] & = -[\bm{I}\; \bm{0} \hdots \bm{0}]\bm{\Gamma}^{-1} \bm{\gamma} \\
+	&= \underbrace{-[\bm{I}\; \bm{0} \hdots \bm{0}] (\predDeltaU^T \bm{Q} \predDeltaU +  \bm{R}^{-1})\predDeltaU \bm{Q}}_{\bm{K}} \Bar{\Tilde{\bm{e}}}[k] \\
+	{\bm{\Delta u}}[k] &= \bm{K} \Bar{\Tilde{\bm{e}}}[k] 
 	\label{equ:2_solve_uc_qp}
 \end{align}
 
 \subsubsection{Unconstrained Basic MPC for LPV Systems}
+To improve the readability of this section, the parameter dependencies in $\omega$ are not always explicitly stated.
+\begin{figure}[H]
+	\centering
+	\include{tikz/OaC_MPC_unconstrained.tex}
+	\caption{Unconstrained Basic MPC structure for LPV systems}
+	\label{fig:Basic_MPC_unconstrained}
+\end{figure}
+Inserting $\tilde{\bar{\bm e}}[k]=\bar{\bm r}[k+1]-\bm \bar{\bm{g}}[k]$, according to the structure depicted of Figure \ref{fig:Basic_MPC_unconstrained}, the Control Law \eqref{equ:2_solve_uc_qp} can be expanded to
+\[
+\Deltaub = \bm{K} \left(\bar{\bm{r}}[k+1] - \left( \bm{P}_u \bm{u}[k-1] + \bm{P}_x \x[k]\right) \right) 
+\]
+With the output accumulation $\bm{u}[k] = \bm{u}[k-1] + \Deltaub$ one derives:
 
+\[
+\bm{u}[k] =  \bm{u}[k-1] - \bm{K}\bm{P}_u \bm{u}[k-1] + \bm{K}  \bar{\bm{r}}[k+1] - \bm{K}\bm{P}_x \x[k]
+\]
+
+For that system, the measured states and the reference prediction vector act as input $\bm{v}_{C,b}[k] = \x[k]\;  \bar{\bm{r}}[k+1]]^\T$ to the controller and the stator voltage as output $\bm{y}_{C,b}[k] = \bm{u}[k]$. 
+
+\begin{align}
+	\bm{u}[k]
+	&=
+	\underbrace{
+		\begin{bmatrix}
+			\bm{I} -\bm{K}\bm{P}_u(\omega[k])
+		\end{bmatrix}
+	}_{\bm{A}_{C,b}}
+	\underbrace{
+	\bm{u}[k-1]}_{\bm{\xi}_{C,b}[k-1]}
+	\quad+\quad
+	\underbrace{
+		\begin{bmatrix}
+			\bm{K} & -\bm{K}\bm{P}_x(\omega[k])
+		\end{bmatrix}
+	}_{\bm{B}_{C,b}}
+	\underbrace{
+	\begin{bmatrix}
+		\bar{\bm{r}}[k+1]\\
+		\bm{x}[k]
+	\end{bmatrix}}_{\bm{v}_{C,b}[k-1]}
+	\\
+	\bm{y}_{C,b}[k]
+	&=
+	\underbrace{
+	\bm{A}_{C,b}}_{\bm{C}_{C,b}}
+	\bm{\xi}_{C,b}[k-1]
+	+
+	\underbrace{ 
+	\bm{B}_{C,b}}_{\bm{D}_{C,b}}
+	\bm{v}_{C,b}[k-1]
+	=
+	\bm{u}[k].
+	\label{equ:2_ss_basic_mpc}
+\end{align}
+The spectrum of the unconstrained Basic Controller's system matrix $\bm{A}_{C,b}(\omega)$, was quantitatively analyzed by plotting its eigenvalues for discrete values of $\omega \in \mathcal{W} = [-10^3, 10^3]$ rad/s.
+The result can be seen in Figure \ref{fig:2_basic_mpc_spectrum}.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.95\linewidth]{Figs/2_basic_mpc_spectrum}
+	\caption{Spectrum of $\bm{A}_{C,b}(\omega)$ for $\omega \in \mathcal{W}$ of the unconstrained Basic MPC.}
+ 	\label{fig:2_basic_mpc_spectrum}
+\end{figure}
+By deriving the transfer function matrix $\bm{v} \rightarrow \bm{y}$ for frozen parameter $\omega = \omega_l$ , the frequency response can be analyzed. 
+\[
+\bm{G}_{vy}\big|_{\omega_l} = \bm{C}_{C,b}\big|_{\omega_l}  \left(z \I - \bm{A}_{C,b}\big|_{\omega_l}  \right)^{-1}\bm{B}_{C,b} + \bm{D}_{C,b}
+\]
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=1\linewidth]{Figs/2_basic_mpc_mimo_tfs}
+	\caption{Frequency response for the unconstrained Basic MPC.}
+ 	\label{fig:2_basic_mpc_mimo_tfs}
+\end{figure}
 
 \subsubsection{Unconstrained Hybrid MPC for LPV Systems}
-To improve the readability of this section, the parameter dependencies $\omega$ are not explicitly stated.\\
+Again, to improve the readability of this section, the parameter dependencies $\omega$ are not explicitly stated.\\
 The reconstructed plant input is defined by Equation \eqref{equ:2_mpcc_ukt}.
 \begin{equation}
 	\tilde{\bm{u}}[k-1] = \bm B^{-1} \left( \bm x[k]-\bm A\bm x[k-1] \right)
 	\label{equ:2_mpcc_ukt}
 \end{equation}
-The control law is linear in terms of the quasi-tracking error with the optimal control gain $\bm{K}$ according to Equation \eqref{equ:2_solve_uc_qp}.
-\[
-\Delta\bm u[k]
-=
--\bm K\tilde{\bm e}[k]
-\]
-
-%With $\bm u[k] = \bm u[k-1]+\Delta\bm u[k] $, this can be written as
-The accumulated plant input is then given by
+The control law is linear in terms of the quasi-tracking error with the optimal control gain $\bm{K}$ according to Equation \eqref{equ:2_solve_uc_qp} $\Delta\bm u[k]=\bm K\tilde{\bm e}[k]$. The accumulated plant input is then given by
 \begin{equation}
-	\bm u[k]
-	=
-	\bm u[k-1]+\bm K\tilde{\bm e}[k]
+	\bm u[k]=\bm u[k-1]+\bm K\tilde{\bm e}[k]
 	\label{equ:2_hyb_u_accum}
 \end{equation}
 
-Using $\tilde{\bm e}[k]=\bar{\bm r}[k+1]-\bm \tilde{\bm{g}}[k]$, Equation \eqref{equ:2_hyb_u_accum} can be expanded to:
+\begin{figure}[H]
+	\centering
+	\include{tikz/Hybrid_MPC_unconstrained.tex}
+	\caption{Unconstrained Hybrid MPC structure for LPV systems}
+	\label{fig:Hybrid_MPC_unconstrained}
+\end{figure}
+
+Using $\tilde{\bar{\bm e}}[k]=\bar{\bm r}[k+1]-\bm \tilde{\bar{\bm{g}}}[k]$, with the definition of $\tilde{\bar{\bm{g}}}[k]$ according to the structure depicted in Figure \ref{fig:Hybrid_MPC_unconstrained}, Equation \eqref{equ:2_hyb_u_accum} can be expanded to:
 \begin{align*}
 	\bm u[k]
 	&=
 	\bm u[k-1]
-	-\bm K
+	+\bm K
 	\left(
 	\bar{\bm r}[k+1]
 	-\bm P_u
@@ -796,15 +864,15 @@ Using $\tilde{\bm e}[k]=\bar{\bm r}[k+1]-\bm \tilde{\bm{g}}[k]$, Equation \eqref
 	\bm x[k]-\bm A\bm x[k-1]
 	\right)
 	\right)
-	+\bm P_x\bm x[k]
+	-\bm P_x\bm x[k]
 	\right)
-	\\[2mm]
+	\\
 	&=
 	\bm u[k-1]
-	-\bm K\bm P_u\bm B^{-1}\bm x[k-1]
-	-\bm K\bar{\bm r}[k+1]
-	+\bm K\bm P_u\bm B^{-1}\bm x[k]
-	+\bm K\bm P_x\bm x[k].
+	+\bm K\bm P_u\bm B^{-1}\bm x[k-1]
+	+\bm K\bar{\bm r}[k+1]
+	-\bm K\bm P_u\bm B^{-1}\bm x[k]
+	-\bm K\bm P_x\bm x[k].
 \end{align*}
 
 After introducing a shift register for $\x[k-1]$, this can be written in matrix notation
@@ -816,7 +884,7 @@ After introducing a shift register for $\x[k-1]$, this can be written in matrix 
 	\end{bmatrix}
 	=
 	\begin{bmatrix}
-		\bm I & -\bm K\bm P_u\bm B^{-1}\bm A\\
+		\bm I & \bm K\bm P_u\bm B^{-1}\bm A\\
 		\bm 0 & \bm 0
 	\end{bmatrix}
 	\begin{bmatrix}
@@ -837,17 +905,8 @@ After introducing a shift register for $\x[k-1]$, this can be written in matrix 
 	\label{equ:2_hyb_mpc_ss}
 \end{align}
 
-This is represented by the Diagram \ref{fig:Hybrid_MPC_unconstrained}.
 
-
-\begin{figure}[H]
-	\centering
-	\include{tikz/Hybrid_MPC_unconstrained.tex}
-	\caption{Unconstrained Hybrid MPC structure for LPV systems}
-	\label{fig:Hybrid_MPC_unconstrained}
-\end{figure}
-
-For that system, the measured states $\bm{u}_{C,h} = x[k]$ act as input to the controller and the stator voltage as output $\bm{y}_{C,h}[k] = \bm{u}[k]$. To derive a state space formulation the state vector is defined as the following $\bm{\xi_{C,h}}^T = [\bm{u}\; \bm{x}]$, $\bm{u}[k-1]$. 
+For that system, the measured states and the reference $ \bm{v}_{C,h} = [\bar{\bm{r}}\;\x]^\T$ act as input to the controller and the stator voltage as output $\bm{y}_{C,h}[k] = \bm{u}[k]$. To derive a state space formulation the state vector is defined as the following $\bm{\xi_{C,h}}^T = [\bm{u}\; \bm{x}]$.
 \begin{align}
 	\begin{bmatrix}
 		\bm{u}[k] \\\bm{x}[k]
@@ -870,21 +929,22 @@ For that system, the measured states $\bm{u}_{C,h} = x[k]$ act as input to the c
 		\bm x[k]
 	\end{bmatrix}
 	\\
-	\bm{y}_{C,h}[k] &= [\bm{I} \; \bm{0}] \cdot \bm{A}_{C,h} \cdot \bm{\xi}[k]+ [\bm{I} \; \bm{0}] \cdot \bm{B}_{C,h} \cdot \bm{x}[k] = \bm{u}[k]
+	\bm{y}_{C,h}[k] &= [\bm{I} \; \bm{0}] \cdot \bm{A}_{C,h} \cdot \bm{\xi}[k-1]+ [\bm{I} \; \bm{0}] \cdot \bm{B}_{C,h} \cdot  \bm{v}_{C,h}[k-1] = \bm{u}[k]
 	\label{equ:2_ss_hyb_mpc}
 \end{align}
 According to the LPV State Space Model \eqref{equ:2_ss_hyb_mpc}, the system matrix $\bm{A}_{C,h}$ is an upper block-triangular matrix. Thus the eigenvalues are on the main diagonal of it. Since those entries are constant, the spectrum of this system matrix is given by
 \begin{equation*}
-\sigma \left( \bm{A}_{C,h} \right) = \{1, 1, 0, 0\} 
+\sigma \left( \bm{A}_{C,h} \left(\omega\right) \right) = \{1, 1, 0, 0\} 
 \end{equation*}
 With two discrete-time eigenvalues at one, it can be said, that this controller is of intergrating behavior. \\
-By deriving the transfer function matrix $\bm{\xi} \rightarrow \bm{u}$ for frozen parameter $\omega = \omega_l$ , the frequency response can be analyzed. 
+Again, the transfer function matrix $\bm{v} \rightarrow \bm{y}$ for frozen parameter $\omega = \omega_l$ is derived, so that the frequency response can be analyzed. 
+
 \[
- \bm{G}_{\xi u}\big|_{\omega_l} = \bm{C}_{C,h}\big|_{\omega_l}  \left(z \I - \bm{A}_{C,h}\big|_{\omega_l}  \right)^{-1}\bm{B}_{C,h} + \bm{D}_{C,h}
+ \bm{G}_{vy}\big|_{\omega_l} = \bm{C}_{C,h}\big|_{\omega_l}  \left(z \I - \bm{A}_{C,h}\big|_{\omega_l}  \right)^{-1}\bm{B}_{C,h} + \bm{D}_{C,h}
 \]
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.95\linewidth]{Figs/2_hyb_mpc_mimo_tfs}
+	\includegraphics[width=1\linewidth]{Figs/2_hyb_mpc_mimo_tfs}
 	\caption{Frequency response for the unconstrained Hybrid MPC.}
 	\label{fig:2_hyb_mpc_mimo_tfs}
 \end{figure}
