@@ -141,7 +141,7 @@ or improves some aspects of robustness as shown in Section \ref{sec:mpcc_comp} (
 \subsection{Prediction Horizon}
 In model predictive one distinguishes between the prediction horizon $N_P$, which describes how many discrete steps in time the dynamics are predicted and the control horizon $N_C$, which is the amount of optimal actuating signal are computed at every step. With $N_C \le N_P$ % TODO: maybe move this to the intro
 Within the scope of this thesis, typically field-oriented current control sampling times of $T_S \in [5,\, 20]\;\si{kHz}$ are considered. To get an optimal trade off between model fault tolerance, tracking performance and computational effort a typical prediction horizon of $N_P \le 3$  with $N_P = N_C$ are considered.\\
-To obtain a prediction for  $\x[k+l]\; l\in \mathbb{N}\; l\le N_P $ , Equation \eqref{equ:2_apv_tk} is iterated one step ahead.
+To obtain a prediction for  $\x[k+l]\; l\in \mathbb{N}\;:\; l\le N_P $ , Equation \eqref{equ:2_apv_tk} is iterated one step ahead.
 \begin{align*}
 	\xh[k+2] = \bm{A}(\hat{\omega}[k+1]) \xh[k+1] + \B (\bm{u}[k] + \bm{\Delta u}[k+1] ) + \bm{E}(\hat{\omega}[k+1])
 \end{align*}
@@ -168,9 +168,10 @@ This continues up to $l=N_P$.
 	+ \left(\sum_{f=0}^{N_P-1}\left(\Aw\right)^f\right)
 	\Ew 
 \end{align*}
-For the nominal system \eqref{equ:2_apv_tk}, the output is equal to the current states $y[k] = x[k]$, but for other formulations with $\bm{C}  \ne \I$ it is necessary to multiply the state description from the left by $\bm{C}$ to obtain an estimation for the output $\hat{\bm{y}}[k+l]$. Doing that and using vector notations for all $l$ of $\xh[k+l]$, leads to 
+For the nominal system \eqref{equ:2_apv_tk}, the output is equal to the current states $y[k] = x[k]$, but for other formulations with $\bm{C}  \ne \I$ it is necessary to multiply the state description from the left by $\bm{C}$ to obtain an estimation for the output $\hat{\bm{y}}[k+l]$. Doing that and using vector notations for all $l\in [1, N_P]$ of $\hat{\bm{y}}[k+l]$, leads to 
 
 \begin{align}
+\begin{split}
 	&
 \underbrace{
 	\begin{bmatrix}
@@ -235,6 +236,7 @@ For the nominal system \eqref{equ:2_apv_tk}, the output is equal to the current 
 	\end{bmatrix}
 }_{\bm{P}_E}
 \Ew
+\end{split}
 \end{align}
 \begin{equation}
 	\Bar{\bm{y}}[k+1] = \underbrace{ \bm{P}_{x} \Bar{\x}[k] + \bm{P}_u \bm{u}[k-1] + \bm{P}_{E}\Ew }_{=:\Bar{\bm{g}}[k]} + \bm{P}_{\Bar{\Delta u}} \Deltaub
@@ -248,8 +250,8 @@ With $\Bar{\bm{g}}[k]$ being parameter variant, but independent of $\Deltaub$. F
 The vector of the voltage increment at the current step in time and its predictions up to the $N_P$th step shall be determined optimal with respect to a certain cost function $J$ and constraints regarding the stator voltage and the predicted current response, such that the determined stator voltage can be physically applied without damaging the machine. For the actuating signal $\Bar{\bm{u}_S}[k]$, this means it has to be bounded by the voltage hexagon and the magnitude of each $\Bar{\bm{i}_S}[k+1]$ must not exceed the current limit $I_max$. Doing so, leads to a general description for MPC for PMSM, similar to the one used in \cite{TOMPFC1}.
 \begin{align*}
 	\Bar{\bm{\Delta u}_S}[k]^* = \arg \min_{\Bar{\bm{\Delta  u}_S}}\; &J(\boldsymbol{u}_{S}[k], \boldsymbol{i}_{S}[k], \boldsymbol{i}_{S,ref}[k+1])\\
-	 \text{s.t.} \quad \boldsymbol{i}_{S}[k+1] \in \mathbb{I}_S &= \{\boldsymbol{i}_{S} \in \mathbb{R}^2 |\|\boldsymbol{i}_{S}^R[k+1]\|_2 \leq {I}_{max} \} \\
-	  \boldsymbol{u}_{S}^S[k] \in \mathbb{U}_{S}^S &= \{ \boldsymbol{u}_{S}^S \in \mathbb{R}^2 | \boldsymbol{u}_{S}^S = U_{DC} \boldsymbol{T}_{abc\rightarrow dq} \boldsymbol{d}_{abc} \}
+	 \text{s.t.} \quad \hat{\boldsymbol{i}}_{S}[k+1] \in \mathbb{I}_S &= \{\boldsymbol{i}_{S} \in \mathbb{R}^2 :\|\boldsymbol{i}_{S}^R[k+1]\|_2 \leq {I}_{max} \} \\
+	  \boldsymbol{u}_{S}^S[k] \in \mathbb{U}_{S}^S &= \{ \boldsymbol{u}_{S}^S \in \mathbb{R}^2 : \boldsymbol{u}_{S}^S = U_{DC} \boldsymbol{T}_{abc\rightarrow dq} \boldsymbol{d}_{abc} \}
 \end{align*}
 Since the controller operates within the RRF, the relation for the voltage constraints must be transformed. To gurantee a unique global minimizer, $J$ must be a convex function and $\mathbb{U}_{S}^R, \mathbb{I}_{S}^R$ convex sets, expressed as a set of linear inequality constraints. To use the framework of quadratic programming, the constraints must be expressed in terms of the optimization variable $\Deltaub$. Keeping this in mind and using index $u$ for quantities regarding the prediction vector of the actuating signal $\Bar{\bm{u}_S}[k]$ and $i$ for quantities regarding the output prediction vector $\Bar{\bm{i}_S}[k+1]$, the goal of this section is to derive a quadratic program in the Form of
 \begin{align}
@@ -285,9 +287,9 @@ Or with a more compact notation $\wLNorm{x}{I} = \x^\T \I \x$  :
 To express the cost in terms of $\Deltaub$, $\Bar{\bm{i}}[k+1] = \Bar{\bm{g}}[k] + \predDeltaU \Deltaub$ is expressed by the prediction based on $\Sigma: \left[\bm{A}(\omega[k]),\bm{B},\bm{E}(\omega[k])\right]$ according to Equation \eqref{equ:2_prediction}. Inserting this into $\eqref{equ:2_J}$, leads to:
 
 \begin{align*}
-	  \bm{\Gamma} = \left( \predDeltaU \right)^\T  \bm{Q} \predDeltaU  + \bm{R}  & \quad & \bm{\gamma}^\T  = 2\Tilde{\Bar{\bm{e}}}[k]^\T \bm{Q} \predDeltaU
+	  \bm{\Gamma} = \left( \predDeltaU \right)^\T  \bm{Q} \predDeltaU  + \bm{R}  & \quad & \bm{\gamma}^\T  = 2\Tilde{\Bar{\bm{e}}}[k+1]^\T \bm{Q} \predDeltaU
 \end{align*}
-With $\Tilde{\Bar{\bm{e}}}[k] = \Bar{\bm{g}}[k] - \Bar{\bm{r}}[k+1]$ being the prediction of the quasi-tracking error. $\bm{Q}, \bm{R}$ must be chosen such that $\bm{\Gamma}  \succ 0$.
+With $\Tilde{\Bar{\bm{e}}}[k+1] = \Bar{\bm{g}}[k] - \Bar{\bm{r}}[k+1]$ being the prediction of the quasi-tracking error. $\bm{Q}, \bm{R}$ must be chosen such that $\bm{\Gamma}  \succ 0$ is ensured.
 
 \subsection{Voltage Constraints} \label{sec:mpcc_opt_v}
 As mentioned in Section \ref{sec:intro_vsi}, the stator voltage vector $\bm{u}_S^S$ is subject to the constraints of the voltage hexagon spanned by the 6 active vectors. 
@@ -567,7 +569,7 @@ The prediction according to Equation \eqref{equ:2_prediction} uses absolute stat
 	\caption{MPC structure used in \cite{mpcCamacho} with the notation used in this thesis}
 	\label{fig:OaC_MPC}
 \end{figure}
-The MPC is provided with a reference prediction $$\bar{\bm{r}}[k+1] = \left[ \bm{r}^\T[k+1]\; \bm{r}^\T[k+2] \; \hdots \bm{r}^\T[k+N_P] \right]^\T$$. Using current states and the previous input, the auxiliary prediction vector $\Bar{\bm{g} [k]}$ can be computed according to Equation \ref{equ:2_prediction}. Using $\Tilde{\Bar{\bm{e}}}[k] = \Bar{\bm{g}}[k] - \Bar{\bm{r}}[k+1]$ to calculate the linear term $\bm{\gamma}$ of the quadratic program, the cost function $J = \wLNorm{\Delta u}{\Gamma} + \bm{\gamma^T} \Deltaub$ is fully determined. To determine the constraints $\bm{M} \Deltaub \le \bm{\mu}$, measured state vector and previous input are required. The output of the Quadratic Program \eqref{equ:2_QP} is the incremental input $\Deltaub$, which is accumulated then  to $\bm{u}[k]$. The interface to the plant is modeled as Sample and Hold elements. \\
+The MPC is provided with a reference prediction $$\bar{\bm{r}}[k+1] = \left[ \bm{r}^\T[k+1]\; \bm{r}^\T[k+2] \; \hdots \bm{r}^\T[k+N_P] \right]^\T$$. Using current states and the previous input, the auxiliary prediction vector $\Bar{\bm{g} [k]}$ can be computed according to Equation \ref{equ:2_prediction}. Using $\Tilde{\Bar{\bm{e}}}[k+1] = \Bar{\bm{g}}[k] - \Bar{\bm{r}}[k+1]$ to calculate the linear term $\bm{\gamma}$ of the quadratic program, the cost function $J = \wLNorm{\Delta u}{\Gamma} + \bm{\gamma^T} \Deltaub$ is fully determined. To determine the constraints $\bm{M} \Deltaub \le \bm{\mu}$, measured state vector and previous input are required. The output of the Quadratic Program \eqref{equ:2_QP} is the incremental input $\Deltaub$, which is accumulated then  to $\bm{u}[k]$. The interface to the plant is modeled as Sample and Hold elements. \\
 Section \ref{sec:mpcc_analysis} provides an analysis on why this approach does not inherently guarantee offset-free tracking, but can be extended  by using the approach discussed in Section \ref{sec:mpcc_ext_is}.
  
 \subsection{MPC with Embedded Integrator}\label{sec:mpcc_mpc_wang}
