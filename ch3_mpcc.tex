@@ -253,43 +253,166 @@ The vector of the voltage increment at the current step in time and its predicti
 	 \text{s.t.} \quad \hat{\boldsymbol{i}}_{S}[k+1] \in \mathbb{I}_S &= \{\boldsymbol{i}_{S} \in \mathbb{R}^2 :\|\boldsymbol{i}_{S}^R[k+1]\|_2 \leq {I}_{max} \} \\
 	  \boldsymbol{u}_{S}^S[k] \in \mathbb{U}_{S}^S &= \{ \boldsymbol{u}_{S}^S \in \mathbb{R}^2 : \boldsymbol{u}_{S}^S = U_{DC} \boldsymbol{T}_{abc\rightarrow dq} \boldsymbol{d}_{abc} \}
 \end{align*}
-Since the controller operates within the RRF, the relation for the voltage constraints must be transformed. To gurantee a unique global minimizer, $J$ must be a convex function and $\mathbb{U}_{S}^R, \mathbb{I}_{S}^R$ convex sets, expressed as a set of linear inequality constraints. To use the framework of quadratic programming, the constraints must be expressed in terms of the optimization variable $\Deltaub$. Keeping this in mind and using index $u$ for quantities regarding the prediction vector of the actuating signal $\Bar{\bm{u}_S}[k]$ and $i$ for quantities regarding the output prediction vector $\Bar{\bm{i}_S}[k+1]$, the goal of this section is to derive a quadratic program in the Form of
-\begin{align}
-	\Bar{\bm{\Delta u}_S^R}[k]^* = \arg \min_{\Bar{\bm{\Delta  u}_S}}\; \frac{1}{2} &\left(\Deltaubsr \right)^\T \bm{\Gamma} \Deltaubsr + \bm{\gamma}^\T \Deltaubsr\\
-	 \text{s.t.} \quad \underbrace{
-	 	\begin{bmatrix}
-	 		\bm{M}_u \\
-	 		\bm{M}_i
-	 	\end{bmatrix}
-	 }_{\bm{M}}
-	 \Deltaubsr
-	 & \le
-	 \underbrace{
-	 	\begin{bmatrix}
-	 		\bm{\mu}_u\\
-	 		\bm{\mu}_i
-	 \end{bmatrix}}_{\bm{\mu}}
- \label{equ:2_QP}
-\end{align}
+Since the controller operates within the RRF, the relation for the voltage constraints must be transformed. To gurantee a unique global minimizer, $J$ must be a convex function and $\mathbb{U}_{S}^R, \mathbb{I}_{S}^R$ convex sets, expressed as a set of linear inequality constraints. To use the framework of quadratic programming, the constraints must be expressed in terms of the optimization variable $\Deltaub$. Keeping this in mind and using index $u$ for quantities regarding the prediction vector of the actuating signal $\Bar{\bm{u}_S}[k]$ and $i$ for quantities regarding the output prediction vector $\Bar{\bm{i}_S}[k+1]$, the goal of this section is to derive a quadratic program in the form of
+\begin{equation}
+\begin{split}
+	\Bar{\bm{\Delta u}_S^R}[k]^* & = \arg \min_{\Bar{\bm{\Delta  u}_S}}\;   \frac{1}{2} \left(\Deltaubsr \right)^\T \bm{\Gamma} \left(\Deltaubsr \right) + \bm{\gamma}^\T \Deltaubsr\\
+	& = \arg \min_{\Bar{\bm{\Delta  u}_S}}\;  \frac{1}{2} \| {\Deltaubsr} \|_{\bm{\Gamma}}^2 + \bm{\gamma}^\T \Deltaubsr \\
+	\text{s.t.} & \quad \underbrace{
+		\begin{bmatrix}
+			\bm{M}_u \\
+			\bm{M}_i
+		\end{bmatrix}
+	}_{\bm{M}}
+	\Deltaubsr
+	\le
+	\underbrace{
+		\begin{bmatrix}
+			\bm{\mu}_u\\
+			\bm{\mu}_i
+	\end{bmatrix}}_{\bm{\mu}}
+	\label{equ:2_QP}
+\end{split}
+\end{equation}
 with the Hessian of the cost function being positive definite $\nabla_{\Deltaub}^2 J = \bm{\Gamma}  \succ 0 $ to ensure convexity.
 
 \subsection{Cost Function}
 For the cost function $J$, a simple LQR-style base cost is employed. With $\bm{Q} \in \mathbb{R}^{N_P q\times N_P q}$ as the diagonal weighting matrix for the tracking error and $\bm{R} \in \mathbb{R}^{N_P m\times N_P m} $ the diagonal weighting matrix  for the stator voltage increment. For the application of electric drives, reference tracking is significantly more important then the magnitude of the stator voltage.
 \begin{equation*}
-J = \left[\; \boldsymbol{\Bar{i}} [k+1] - \boldsymbol{\Bar{i}}_{ref} [k+1] \; \right]^\T \boldsymbol{Q} \left[\; \boldsymbol{\Bar{i}} [k+1] - \boldsymbol{\Bar{i}}_{ref} [k+1]\; \right] + \left(\Deltaub \right)^\T \boldsymbol{R} \Deltaub
+J = \left(\; \bm{\Bar{i}} [k+1] - \boldsymbol{\Bar{i}}_{ref} [k+1] \; \right)^\T \boldsymbol{Q} \left(\; \boldsymbol{\Bar{i}} [k+1] - \boldsymbol{\Bar{i}}_{ref} [k+1]\; \right) + \left(\Deltaub \right)^\T \; \boldsymbol{R} \; \Deltaub
 \end{equation*}
 Or with a more compact notation $\wLNorm{x}{I} = \x^\T \I \x$  :
-% + \wLNorm{\Bar{z}}{W_I} + w_{\eta} \eta + \wLNorm{i_N}{W_N}
 \begin{equation}
-	J = \wLNorm{\boldsymbol{\Bar{i}}  - \boldsymbol{\Bar{i}}_{ref} }{Q}  + \wLNorm{\Bar{\boldsymbol{\Delta u}}}{R}
+	J = \| \bm{\Bar{i}}  - \bm{\Bar{i}}_{ref} \|_{Q}^2  + \wLNorm{\Bar{\boldsymbol{\Delta u}}}{R}
 	\label{equ:2_J}
 \end{equation}
-To express the cost in terms of $\Deltaub$, $\Bar{\bm{i}}[k+1] = \Bar{\bm{g}}[k] + \predDeltaU \Deltaub$ is expressed by the prediction based on $\Sigma: \left[\bm{A}(\omega[k]),\bm{B},\bm{E}(\omega[k])\right]$ according to Equation \eqref{equ:2_prediction}. Inserting this into $\eqref{equ:2_J}$, leads to:
+To express the cost $J$ in terms of $\Deltaub$, the prediction for the current as output signal is expressed by the prediction based on $\Sigma: \left[\bm{A}(\omega[k]),\bm{B},\bm{E}(\omega[k])\right]$ according to Equation \eqref{equ:2_prediction}. 
+\[
+\Bar{\bm{i}}[k+1]  = \Bar{\bm{y}}[k+1] = \Bar{\bm{g}}[k] + \predDeltaU \Deltaub
+\]
+A prediction of the reference current is given as input $ \Bar{\bm i}_{ref} [k+1] = \Bar{\bm r} [k+1]$.
+\begin{align*}
+	\Bar{\bm{i}}[k+1] - \Bar{\bm{i}}_{ref}[k+1]
+	&= \Bar{\bm{y}}[k+1] - \Bar{\bm{r}}[k+1] \\
+	&= \underbrace{\bm{P}_x \x + \bm{P}_u \bm{u}[-1] + \bm{P}_E \Ew}_{\Bar{\bm{g}}[k]}
+	- \Bar{\bm{r}}[k+1] + \predDeltaU \Deltaub \\
+	&= \Bar{\Tilde{\bm{e}}}[k+1] + \predDeltaU \Deltaub
+\end{align*}
+Here, $\Tilde{\Bar{\bm{e}}}[k+1] = \Bar{\bm{g}}[k] - \Bar{\bm{r}}[k+1]$ is defined as the prediction of the quasi-tracking error. This is a summation of the prediction terms independent of $\Deltaub$. The separation is done in order to use $\Deltaub$ as the vector of optimization variables. Inserting this into $\eqref{equ:2_J}$, leads to:
+\[
+J = \left(\Bar{\Tilde{\bm{e}}}[k+1] + \predDeltaU \Deltaub \right)^T \bm{Q} \left(\Bar{\Tilde{\bm{e}}}[k+1] + \predDeltaU \Deltaub\right) +  \left(\Deltaub \right)^\T \; \boldsymbol{R} \; \Deltaub
+\]
+Skipping the time indices $k$ for the quasi-error prediction, this is expanded to
 
 \begin{align*}
-	  \bm{\Gamma} = \left( \predDeltaU \right)^\T  \bm{Q} \predDeltaU  + \bm{R}  & \quad & \bm{\gamma}^\T  = 2\Tilde{\Bar{\bm{e}}}[k+1]^\T \bm{Q} \predDeltaU
+	J
+	={}&
+	\Bar{\Tilde{\bm{e}}}^{T}
+	\bm{Q}
+	\Bar{\Tilde{\bm{e}}}
+	+
+	2\left(\Deltaub\right)^T
+	\predDeltaU^T
+	\bm{Q}
+	\Bar{\Tilde{\bm{e}}}
+	\\
+	&+
+	\left(\Deltaub\right)^T
+	\predDeltaU^T
+	\bm{Q}
+	\predDeltaU
+	\Deltaub
+	+
+	\left(\Deltaub\right)^T
+	\boldsymbol{R}
+	\Deltaub
+	\\
+	={}&
+	\left(\Deltaub\right)^T
+	\left(
+	\predDeltaU^T
+	\bm{Q}
+	\predDeltaU
+	+
+	\boldsymbol{R}
+	\right)
+	\Deltaub
+	+
+	2
+	\Bar{\Tilde{\bm{e}}}^{T}
+	\bm{Q}
+	\predDeltaU
+	\Deltaub
+	\\
+	&+
+	\Bar{\Tilde{\bm{e}}}^{T}
+	\bm{Q}
+	\Bar{\Tilde{\bm{e}}}.
 \end{align*}
-With $\Tilde{\Bar{\bm{e}}}[k+1] = \Bar{\bm{g}}[k] - \Bar{\bm{r}}[k+1]$ being the prediction of the quasi-tracking error. $\bm{Q}, \bm{R}$ must be chosen such that $\bm{\Gamma}  \succ 0$ is ensured.
+
+Due to $	\Bar{\Tilde{\bm{e}}}^{T}\bm{Q} \Bar{\Tilde{\bm{e}}}$ being constant in relation to the optimization vector, it can be ignored. Using the aforementioned compact notation and coefficient comparison for the matrices of the Quadratic Program \eqref{equ:2_QP} can be conducted.
+
+\begin{align*}
+	J &=  \quad \| {\Deltaub} \|_{\left( \predDeltaU \right)^\T  \bm{Q} \predDeltaU + \bm{R}}^2 &+\quad& 2 \left(\Tilde{\Bar{\bm{e}}}[k+1]\right)^\T \bm{Q} \predDeltaU \Deltaub \\
+	 &\overset{!}{=} \quad \frac{1}{2} \| {\Deltaub} \|_{\bm{\Gamma}}^2  &+\quad&  \bm{\gamma}^\T \Deltaub \\
+\end{align*}
+
+Keeping the factor $1/2$ for the quadratic term in mind, the matrices $\bm \Gamma, \bm \gamma$ are defined as
+
+\begin{comment}
+	Skipping the time indices $k$, this is expanded to
+	\[
+	\begin{aligned}
+		J
+		={}&
+		\Bar{\Tilde{\bm{e}}}^{T}[k+1]
+		\bm{Q}
+		\Bar{\Tilde{\bm{e}}}[k+1]
+		+
+		2\left(\Deltaub\right)^T
+		\predDeltaU^T
+		\bm{Q}
+		\Bar{\Tilde{\bm{e}}}[k+1]
+		\\
+		&+
+		\left(\Deltaub\right)^T
+		\predDeltaU^T
+		\bm{Q}
+		\predDeltaU
+		\Deltaub
+		+
+		\left(\Deltaub\right)^T
+		\boldsymbol{R}
+		\Deltaub
+		\\
+		={}&
+		\left(\Deltaub\right)^T
+		\left(
+		\predDeltaU^T
+		\bm{Q}
+		\predDeltaU
+		+
+		\boldsymbol{R}
+		\right)
+		\Deltaub
+		+
+		2
+		\Bar{\Tilde{\bm{e}}}^{T}[k+1]
+		\bm{Q}
+		\predDeltaU
+		\Deltaub
+		\\
+		&+
+		\Bar{\Tilde{\bm{e}}}^{T}[k+1]
+		\bm{Q}
+		\Bar{\Tilde{\bm{e}}}[k+1].
+	\end{aligned}
+	\]
+\end{comment}
+\begin{align*}
+	  \bm{\Gamma} = 2  \left(\left( \predDeltaU \right)^\T  \bm{Q} \predDeltaU  + \bm{R} \right) & \quad & \bm{\gamma}^\T  = 2 \left(\Tilde{\Bar{\bm{e}}}[k+1]\right)^\T \bm{Q} \predDeltaU
+\end{align*}
+To ensure convexity,  $\bm{Q}, \bm{R}$ must be chosen such that $\bm{\Gamma}  \succ 0$.
 
 \subsection{Voltage Constraints} \label{sec:mpcc_opt_v}
 As mentioned in Section \ref{sec:intro_vsi}, the stator voltage vector $\bm{u}_S^S$ is subject to the constraints of the voltage hexagon spanned by the 6 active vectors. 
