@@ -145,7 +145,7 @@ To obtain a prediction for  $\x[k+l]\; l\in \mathbb{N}\;:\; l\le N_P $ , Equatio
 \begin{align*}
 	\xh[k+2] = \bm{A}(\hat{\omega}[k+1]) \xh[k+1] + \B (\bm{u}[k] + \bm{\Delta u}[k+1] ) + \bm{E}(\hat{\omega}[k+1])
 \end{align*}
-Using Relation \eqref{equ:2_apv_tk} for the estimation $\xh[k+1]$, $\bm{u}[k]  = \bm{u}[k-1] + \bm{\Delta u}[k] $ and assuming $\hat{\omega}[k+l] = \omega[k]$, leads to
+Using Relation \eqref{equ:2_apv_tk} for the estimation $\xh[k+1]$, $\bm{u}[k]  = \bm{u}[k-1] + \bm{\Delta u}[k] $ and assuming constant rotor speed for all prediction steps $\hat{\omega}[k+l] = \omega[k]$, leads to
 \begin{align*}
 	\xh[k+2] &= \Aw \left(\Aw \x[k] + \B (\bm{u}[k-1] + \bm{\Delta u}[k] + \Ew \right) \\ 
 	&+  \B (\bm{u}[k-1] + \bm{\Delta u}[k] + \bm{\Delta u}[k+1]) + \Ew \\
@@ -302,7 +302,7 @@ Here, $\Tilde{\Bar{\bm{e}}}[k+1] = \Bar{\bm{g}}[k] - \Bar{\bm{r}}[k+1]$ is defin
 \[
 J = \left(\Bar{\Tilde{\bm{e}}}[k+1] + \predDeltaU \Deltaub \right)^T \bm{Q} \left(\Bar{\Tilde{\bm{e}}}[k+1] + \predDeltaU \Deltaub\right) +  \left(\Deltaub \right)^\T \; \boldsymbol{R} \; \Deltaub
 \]
-Skipping the time indices $k$ for the quasi-error prediction, this is expanded to
+For readability the indices $k$ for the quasi-error prediction are not written down. Using the symmetric property of the diagonal weighting matrices $\bm{Q,R}$, the cost function is expanded to:
 
 \begin{align*}
 	J
@@ -415,7 +415,15 @@ Keeping the factor $1/2$ for the quadratic term in mind, the matrices $\bm \Gamm
 To ensure convexity,  $\bm{Q}, \bm{R}$ must be chosen such that $\bm{\Gamma}  \succ 0$.
 
 \subsection{Voltage Constraints} \label{sec:mpcc_opt_v}
-As mentioned in Section \ref{sec:intro_vsi}, the stator voltage vector $\bm{u}_S^S$ is subject to the constraints of the voltage hexagon spanned by the 6 active vectors. 
+As mentioned in Section \ref{sec:intro_vsi}, the stator voltage vector $\bm{u}_S^S$ is subject to the constraints of the voltage hexagon spanned by the 6 active vectors. This is depicted in Figure \ref{fig:SRF_hexagon}.
+
+\begin{figure}[h]
+	\centering
+	\include{tikz/SRF_hexagon.tex}
+	\caption{Voltage Hexagon in SRF}
+	\label{fig:SRF_hexagon}
+\end{figure}
+
 These constraints can be formulated as a set of linear inequality constraints. For example, the upper flat border of the hexagon is described by 
 \begin{equation}
 	u_\beta \le \frac{U_{DC}}{\sqrt{3}}
@@ -583,7 +591,14 @@ The Constraint \ref{equ:2_constraints_I_sv} describes a disk on the complex plan
 this is approximated by a polygon, to allow for a constraint description as a finite set of linear inequality constraints. However, this usually leads to a high amount of inequalities \cite{NeunerMA}.  %TODO: cite andere
 One approach to reduce that, it so introduce parameter-varying constraints, as in \cite{TOMPFC1}.
 \subsubsection{Parameter-Invariant Constraints}
-Constraint \eqref{equ:2_constraints_I_sv} was approximated by an octagon. The octagon is oriented in a way, such that the $\pm i_{q}$ under approximated constraints are exactly equal $I_{max}$.
+Constraint \eqref{equ:2_constraints_I_sv} was approximated by an octagon. The octagon is oriented in a way, such that the $\pm i_{q}$ under approximated constraints are exactly equal $I_{max}$. This is depicted in Figure \ref{fig:2_RRF_octagon}.
+
+\begin{figure}[H]
+	\centering
+	\include{tikz/RRF_octagon.tex}
+	\caption{Current constraints approximation in RRF}
+	\label{fig:2_RRF_octagon}
+\end{figure}
 Analog to the procedure described in Section \ref{sec:mpcc_opt_v} for the voltage hexagon, an octagon is constructed. For the full analytic derivation of the set of inequalities for the octagon, refer to Section 5.2 of \cite{NeunerMA}.
 
 \[
@@ -869,7 +884,7 @@ For the unconstrained case, the  Quadratic Program can be solved offline by find
 	\nabla_{\Deltaub} J &= \bm{\Gamma}\Deltaub + \bm{\gamma} = 0 \\
 		{\bm{\Delta u}}^* [k] &= -\bm{\Gamma}^{-1} \bm{\gamma}
 \end{align*}
-With $ \nabla_{\Deltaub}^2 J = \bm{\Gamma}  \succ 0 $ ensuring the stationary point to be a minimizer and $\bm{\Gamma}  \succ 0$ is ensured by the choice of $\bm{Q, R}$.\\
+With  the Hessian matrix $ \nabla_{\Deltaub}^2 J = \bm{\Gamma}  \succ 0 $ ensuring the stationary point to be a minimizer and $\bm{\Gamma}  \succ 0$ is ensured by the choice of $\bm{Q, R}$.\\
 
 In model predictive control only the first signal of the computed optimal input prediction is applied, thus the locally unconstrained  linear control law $\Deltaub =\bm{K}{\Bar{\bm{e}}}[k])$ can be written as  Relation \eqref{equ:2_solve_uc_qp}.
 \begin{align}
@@ -1067,12 +1082,91 @@ Again, the transfer function matrix $\bm{v} \rightarrow \bm{y}$ for frozen param
 \[
  \bm{G}_{vy}\big|_{\omega_l} = \bm{C}_{C,h}\big|_{\omega_l}  \left(z \I - \bm{A}_{C,h}\big|_{\omega_l}  \right)^{-1}\bm{B}_{C,h} + \bm{D}_{C,h}
 \]
+
+The obtained frequency responses for $\omega \in [-1\; -0.5 \; 0 \; 0.5 \; 1] \cdot 10^3$ rad/s are depicted in Figure \ref{fig:2_hyb_mpc_mimo_tfs}.
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=1\linewidth]{Figs/2_hyb_mpc_mimo_tfs}
 	\caption{Frequency response for the unconstrained Hybrid MPC.}
 	\label{fig:2_hyb_mpc_mimo_tfs}
 \end{figure}
+
+
+\subsubsection{Unconstrained MPC with Embedded Integrator for LPV Systems}
+
+If the notation used in this thesis is applied to Equation (1.29) of Wang's Book \cite{mpcWang} for the optimal control signal of the linear unconstrained augmented system $\Sigma_\Delta: \left(\bm{A}_\Delta, \bm{B}_\Delta, \bm{C}_\Delta,\right)$ \eqref{equ:2_augmented_wang}, the result is given by Equation \eqref{equ:2_wang_Deltaub_opt}. Where $\{ \mathcal{\bm P}_{\Delta u}, \mathcal{\bm P}_{\Delta x} \}$ are the prediction matrices for the state feedback and input of the augmented system $\Sigma_\Delta$, similar to the structure of $\{\predDeltaU, \bm{P}_x\}$ as given by Equation \eqref{equ:2_prediction}. 
+
+\begin{align}
+	\Deltaub^*
+	&= [\bm{I}\; \bm{0} \hdots \bm{0}]
+	\left(
+	\mathcal{\bm P}_{\Delta u}^\T
+	\mathcal{\bm P}_{\Delta u}
+	+ \bm{R}
+	\right)^{-1}
+	\left(
+	\mathcal{\bm P}_{\Delta u}^\T
+	\mathcal{\bm P}_{r} \bm{r}[k+1]
+	-
+	\mathcal{\bm P}_{\Delta u}^\T
+	\mathcal{\bm P}_{\Delta x}
+	\underbrace{[\Delta \x[k]\; \bm{y}[k]]}_{\bm{\xi}_{\Delta}[k]}
+	\right)
+	\label{equ:2_wang_Deltaub_opt}
+	\\
+	&= \bm{K}_y
+	\left(
+	\bm{r}[k+1] - \bm{y}[k]
+	\right)
+	+ \bm{K}_x \Delta \x[k]
+	\label{equ:2_wang_KxKy}
+\end{align}
+
+By doing a coefficient comparison with of Equations \eqref{equ:2_wang_Deltaub_opt} and \eqref{equ:2_wang_KxKy}, the linear control gains can be determined. With that the Diagram \ref{fig:Wang_MPC_unconstrained} for the locally unconstrained controller can be derived.
+
+\begin{figure}[H]
+	\centering
+	\include{tikz/Wang_MPC_unconstrained.tex}
+	\caption{Unconstrained MPC with embedded integrator accoding to Wang  \cite{mpcWang} for LPV systems using the notation of this thesis.}
+	\label{fig:Wang_MPC_unconstrained}
+\end{figure}
+
+Using the same method for the derivation of the state space model for the Basic and Hybrid MPC, the dynamics for the unconstrained embedded integrator MPC formulation is derived.
+
+\begin{equation}
+	\begin{bmatrix}
+		\bm{u}[k] \\ \bm{x}[k]
+	\end{bmatrix}
+	= 
+	\underbrace{
+		\begin{bmatrix}
+			\bm{I} & \bm{K}_x \\ \bm{0} & \bm{0}
+	\end{bmatrix}}_{\bm{A}_{C,ei}} 
+	\begin{bmatrix}
+		\bm{u}[k-1] \\ \bm{x}[k-1]
+	\end{bmatrix} 
+	+
+	\underbrace{
+		\begin{bmatrix}
+			-\bm{K}_y & \bm{K}_y - \bm{K}_x \\
+			\bm{0} & \bm{I} 
+	\end{bmatrix}}_{\bm{B}_{C,ei}}
+	\begin{bmatrix}
+		\bm{r}[k+1]\\
+		\bm{x}[k]
+	\end{bmatrix}
+	\label{equ:2_ss_ei_mpc}
+\end{equation}
+
+Again, the controller's system matrix $\bm{A}_{C,ei}$ of Equation \eqref{equ:2_ss_ei_mpc} an upper block-triangular. Thus, its spectrum can be easily written down:
+
+\[
+\sigma \left( \bm{A}_{C,ei} \left(\omega\right) \right) = \{1, 1, 0, 0\}.
+\]
+
+With that the integrating behavior in the unconstrained operation can be directly observed.
+
+
 \subsection{Closed-Loop Structure with active Constraints}
 \subsection{Prediction Error Propagation}
 \subsection{Integral Behavior}

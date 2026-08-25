@@ -1,0 +1,21 @@
+\begin{tikzpicture}[scale=2.5, >=stealth]
+	
+	\def\V{1}
+	\draw[->] (-1.25*\V,0) -- (1.25*\V,0)
+	node[right] {$i_d$};
+	\draw[->] (0,-1.25*\V) -- (0,1.25*\V)
+	node[above] {$i_q$};
+	\draw[dashed]
+	(0:\V)
+	-- (45:\V)
+	-- (90:\V)
+	-- (135:\V)
+	-- (180:\V)
+	-- (225:\V)
+	-- (270:\V)
+	-- (315:\V)
+	-- cycle;
+	\fill (0,0) circle (0.7pt);
+	\draw (0,0) circle (1cm);
+	\node (node1) at (0.18,1.1) {$I_{max}$};
+\end{tikzpicture}
