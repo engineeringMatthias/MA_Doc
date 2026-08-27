@@ -1,4 +1,47 @@
-\chapter{Appendix Title}
+\chapter{Appendix}
 \label{ch:appendix_a}
 
-This is an example of an appendix.
+\section{Machine Parameters}
+
+\begin{table}[H]
+	\centering
+	\caption{Parameters of the NW3 PMSM}
+	\begin{tabular}{l|l|l}
+		\textbf{Quantity} & \textbf{Symbol} & \textbf{Value} \\
+		\hline
+		Machine type & -- & 8JSA65.E7025D0-0 Rev. C0 \\
+		Serial number & -- & AD00 113065997 \\
+		Number of pole pairs & $p$ & 5 \\
+		Nominal current & $I_{N}$ & 9.3 A \\
+		Nominal torque & $M_{N}$ & 17.2 Nm \\
+		Maximum current & $I_max$ & 12.5 A \\
+		Nominal DC-link voltage & $U_{N}$ & 560 VDC \\
+		Nominal speed & $n_{N}$ & 2500 rpm \\
+		Stator resistance & $R_{s}$ & 0.41 $\Omega$ \\
+		Stator inductance & $L_{d} = L_q $ & 3.5 mH \\
+		Permanent magnet flux linkage & $\psi_{PM}$ & 0.1843 Vs \\
+	\end{tabular}
+		\label{tab:params_NW3}
+\end{table}
+
+
+\begin{table}[H]
+	\centering
+	\caption{Nominal tuning parameter values for the model-predictive current controller}
+	\begin{tabular}{l|c|c}
+		\textbf{Quantity} & \textbf{Symbol} & \textbf{Value} \\
+		\hline
+		Number of decision steps & $D_s$ & 2 \\
+		Tracking weight & $Q$ & $2\cdot 10^3$ \\
+		Control increment weight & $R$ & $1$ \\
+		Cost-based Integral Tracking error weight & $W_I$ & $5$ \\
+		Soft constraint weight & $w_\eta$ & $1\cdot 10^4$ \\
+	\end{tabular}
+	\label{tab:typ_params_mpcc}
+\end{table}
+ 
+ \textit{Note:} $\bm{Q} \in \mathbb{R}^{qD_s \times qD_s}$,
+ $\bm{R},\bm{W}_I \in \mathbb{R}^{mD_s \times mD_s}$ are diagonal
+ weighting matrices with identical diagonal elements.
+
+

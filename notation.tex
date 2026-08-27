@@ -1,0 +1,107 @@
+\section*{Notation}
+
+\begin{table}[H]
+	\centering
+	\caption{Modellierung Symbole}
+	\begin{tabular}{c|c|l}
+		Symbol & Code & Beschreibung \\
+		\hline
+		$ \varphi_e , \varphi_m $ & & Rotorposition \\
+		$\omega_e, \omega_m$ & \verb|we, wm| & Rotorgeschwindigkeit elektrisch, mechanisch \\
+		%$\boldsymbol{\varphi}$ & \verb|phi_vec|  & $\boldsymbol{\varphi}^T = [\varepsilon, \Dot{\varepsilon}, \Ddot{\varepsilon}] = [\varepsilon, \omega, \Dot{\omega}]$ \\
+		$ \psi$ &  & magnetische Flussverkettung \\
+		$u$ &  & elektrische Spannung - immer die Stellgröße im Regelkreis \\
+		$i$ &  & \\
+		$i_{S,filter}$ &  & aufgrund Strommesskette gefilterter Statorstrom \\
+		$p$ & & Polpaarzahl\\
+		$L$ & &  \\
+		$R$ & &  \\
+		
+		
+	\end{tabular}
+	%	\label{tab:placeholder}
+\end{table}
+
+\begin{table}[H]
+	\centering
+	\caption{Regelung Symbole}
+	\begin{tabular}{c|c|l}
+		Symbol & Code & Beschreibung \\
+		\hline
+		$A$ &  & Systemmatrix $\mathbb{R}^{n \times  n}$\\
+		$B$ &  & Eingangsmatrix $\mathbb{R}^{m \times  n}$\\
+		$C$ &  & Ausgangangsmatrix $\mathbb{R}^{n \times  q}$\\
+		$E$ &  & Affiner Term des Zustandsmodells, induzierte Spannung in RRF \\
+		%G& & Freihalten für QP, gemeinsam mit $\gamma,  \Gamma$\\
+		$\x$&  & Zustandsvektor $\mathbb{R}^{n \times  1}$\\
+		$\xi$&   & Erweiterter Zustandsvektor \\
+		u& & Eingangsvektor $\mathbb{R}^{m \times  1}$\\
+		$\Delta u, \Bar{\Delta u}$ & \verb|Delta_uk(_b)| & Differentieller Eingangsvektor, $\overline{\text{Prädiktionsvektor}}$ für ${\Delta u}$ über $N_P$ \\
+		y & & Ausgang $\mathbb{R}^{q \times  1}$ \\
+		$N_P, N_C, D_S$ & & Prädiktionshorizont, Regelungshorizont, Entscheidungsschritte\\
+		d & & Störung  \\
+		$P_x, P_u,P_{\Bar{\Delta u}}, P_{E\omega}$& & Vorhersage-Matrizen respektive $x, u, \Bar{\Delta u}$, $E(\omega[k])$\\
+		%$P_{\Bar{\Delta u}, accum}$ & &${\text{Prädiktionsmatrix}}$, akkumuliert  ${\Bar{\Delta u}} \rightarrow \Bar{u}$\\
+		%          ${D}_{dq\alpha \beta}$ & & inv. Park Transformation; Rotationsmatrix$^T$ $\in \mathbb{R}^2$\\
+		%          ${N}_{dq\alpha \beta}$ &  & Blockdiagonalmatrix aus $D_S$-vielen ${D}_{dq\alpha \beta}(\varepsilon)$\\
+		$T_S$ &  & Abtastzeit, Regelkreis\\
+		$\Lambda, \lambda$ & & Luenberger Beobachter Verstärkung \\
+		$ \eta $ & & Soft Constraint \\
+		$ \boldsymbol{\rho} $ & & Skalierungs/Aktivierungsvektor für skalares $\eta$ \\
+		
+	\end{tabular}
+	%\label{tab:placeholder}
+\end{table}
+
+\begin{table}[H]
+	\centering
+	\caption{Symboldekorationen mit $x$ als Beispielsymbol}
+	\begin{tabular}{c|c|l}
+		Symbol & Code & Beschreibung \\
+		\hline
+		$\boldsymbol{x}, \boldsymbol{X}$ &  & Vektor, Matrix \\
+		$\Dot{x}, \Ddot{x}$  & Präfix d & 1., 2. zeitliche Ableitung \\
+		$\Hat{x}$ & Suffix h & geschätzte Größe \\
+		$\overline{\boldsymbol{x}}, \overline{\boldsymbol{X}}$ & Suffix b & prädizierter Vektor (über $N_P$) , für Prädiktion benötigte Matrix \\
+		$\Tilde{x}$ & Suffix t&  Modifikation, Abwandlung von $x$\\
+		$\underline{x}$ & & komplexer Zeiger \\ 
+		$x^*$ & Suffix opt & optimale Größe \\
+	\end{tabular}
+	%	\label{tab:placeholder}
+\end{table}
+
+\begin{table}[H]
+	\centering
+	\caption{Koordinatensysteme}
+	\begin{tabular}{c|c|l}
+		Symbol & Code & Beschreibung \\
+		\hline
+		$\alpha, \beta$  & SRF & Stator festes KS \\
+		$ d, q$ & RRF & Rotorfestes KS \\
+		$ a,b,c $ &  & Motoranschluss basiert \\
+		$\clarke $&  \verb|T.C| & Transformation from 3 phase system to SRF\\
+		$\park $ & &Transformation form SRF to RRF for current $\varphi[k]$\\ 
+		$\predPark$ &  & $\park$ for prediction vector \\
+		$\iclarke  = \clarke^{\dagger} $ & \verb|T.iC|& Inverse Transform: SRF to 3 phase \\
+		$\ipark =  \park^{-1} $ &  & Inverse Transform: RRF to SRF \\ 
+	\end{tabular}
+%	\label{tab:placeholder}
+\end{table}
+
+\begin{table}[H]
+	\centering
+	\caption{Operatoren}
+	\begin{tabular}{c|c|l}
+		Symbol & Code & Beschreibung \\
+		\hline
+		$\sigma()$  &  & Spektrum einer Matrix \\
+		$s$ & & Laplace Variable \\
+		$z$ &  & Z-Transformation Variable\\
+		$\bm{X}^{\dagger}$ & & Moore-Penrose Pseudo-Inverse\\
+		$\wLNorm{x}{Q}$ & & Quadrtic Form of $\bm{x}$ with weighting $ \x^\T \bm{Q} \x$ \\
+		$\nabla_{\bm{x}} J $ & & Gradient of $J$ with respect to $x$ \\
+		$\nabla_{\bm{x}} J $ & & Hessian Matrix  $J$ with respect to $x$ \\
+		$\Sigma:$& & Systemdefinition (Zustandsraumodell)\\
+	\end{tabular}
+	%\label{tab:placeholder}
+\end{table}

@@ -1,6 +1,6 @@
 \begin{tikzpicture}
 	\node[draw] (node2) at (3.93,3) {$\frac{z}{z-1}$};
-
+	
 	\node[draw] (node3) at (5.29,1.51) {$1-z^{-1}$};
 	\node at (7.2,1.78) {$x[k] = y[k]$};
 	\node at (4,1.74) {$\Delta x[k]$};
@@ -9,38 +9,38 @@
 	\node (node1) at (0.8,3.78) {$\scriptstyle\omega[k]$};
 	\draw[fill=black] (6.2,1.51) circle (0.05cm);
 	\node (node10) at (-2.16,3.33) {${r}[k+1]$};
-
-  \node at (0.17,3) {$-K_y$};
-
-  \node[draw, shape=isosceles triangle, minimum height=38pt] (node13) at (0.05,3) {};
-  \node[draw, shape=isosceles triangle, minimum height=38pt, rotate=180] (node14) at (2.96,1.51) {};
-
-  \draw (-1.08,3) circle (0.1cm);
-
-  \node at (-0.81,2.83) {-};
-  \draw[->] (-0.98,3) -- (node13.west);
-  \draw[->] (-2.5,3) -- (-1.18,3);
-
-
-  \node (node16) at (0.88,3.5) {$\scriptstyle\omega[k-1]$};
-
-  \draw[->] (0.41,3.81) -- (0.41,3.28);
-  \draw[->] (2.64,2.33) -- (2.64,1.8);
-
-  \draw[->] (node2.east) -- (6.2,2.99);
-  \draw[->] (6.5,1.51) -- (node3.east);
-
-  \draw (1.5,3) circle (0.1cm);
-
-  \node at (2.8,1.51) {$-K_x$};
-  \draw[->] (node3.west) -- (node14.west);
-
-  \draw[->] (node14.east) -- (1.5,1.51) -- (1.5,2.9);
-
-  \draw[->] (6.2,1.5) -- (6.2,0.5) -- (-1.08,0.5) -- (-1.08,2.9);
-  \draw[->] (node13.east) -- (1.4,3);
-  \draw[->] (1.6,3) -- (node2.west);
-
-  \node (node4) at (3.1,2.55) {$\scriptstyle\omega[k]$};
-  \node (node17) at (3.16,2.24) {$\scriptstyle\omega[k-1]$};
+	
+	\node at (0.17,3) {$-K_y$};
+	
+	\node[draw, shape=isosceles triangle, minimum height=38pt] (node13) at (0.05,3) {};
+	\node[draw, shape=isosceles triangle, minimum height=38pt, rotate=180] (node14) at (2.96,1.51) {};
+	
+	\draw (-1.08,3) circle (0.1cm);
+	
+	\node at (-1.24,3.21) {-};
+	\draw[->] (-0.98,3) -- (node13.west);
+	\draw[->] (-2.5,3) -- (-1.18,3);
+	
+	
+	\node (node16) at (1.02,3.5) {$\scriptstyle\omega[k-1]$};
+	
+	\draw[->] (0.41,3.81) -- (0.41,3.28);
+	\draw[->] (2.64,2.33) -- (2.64,1.8);
+	
+	\draw[->] (node2.east) -- (6.2,2.99);
+	\draw[->] (6.5,1.51) -- (node3.east);
+	
+	\draw (1.5,3) circle (0.1cm);
+	
+	\node at (2.8,1.51) {$-K_x$};
+	\draw[->] (node3.west) -- (node14.west);
+	
+	\draw[->] (node14.east) -- (1.5,1.51) -- (1.5,2.9);
+	
+	\draw[->] (6.2,1.5) -- (6.2,0.5) -- (-1.08,0.5) -- (-1.08,2.9);
+	\draw[->] (node13.east) -- (1.4,3);
+	\draw[->] (1.6,3) -- (node2.west);
+	
+	\node (node4) at (3.1,2.55) {$\scriptstyle\omega[k]$};
+	\node (node17) at (3.3,2.24) {$\scriptstyle\omega[k-1]$};
 \end{tikzpicture}

@@ -1,8 +1,7 @@
 \chapter{Model Predictive Current Control}
 
 \section{Prediction Model}
-Only Predict current dynamics, dont use coupling in prediction
-Caramaot OaC book zitieren.
+This section discusses the derivation of the nonlinear, discrete-time prediction of the PMSM’s dynamics. First, the decision-making process for this prediction model is outlined in the context of field-oriented current control for PMSMs. Next, the process of discretizing the continuous-time system is explained. For the current controller in this chapter, this is relatively simple; however, it poses greater challenges in the observer-based current prediction controller in Chapter \ref{ch:ipred}. Finally, as is typical for MPC, the prediction is extended to the entire prediction horizon. The assumptions relevant to the prediction are also presented there.
 \subsection{Choice of adequate State Space Model}
 As derived in Section \ref{sec:model_pmsm}, the model of the interior magnet PMSM is given by Equation \eqref{equ:2_apv_ss}.
 \begin{equation}
@@ -35,7 +34,7 @@ As derived in Section \ref{sec:model_pmsm}, the model of the interior magnet PMS
 	\end{bmatrix}}_{\bm{E}_c(\omega(t))}
 	\label{equ:2_apv_ss}
 \end{equation}
-For the ease of notation, $\omega = \omega_e = \omega_{m1}p$ refers to the electrical rotor speed for the rest of this thesis. Writing the nonlinear continuous time dynamic system in established control theory notation leads to the following notation:
+For the ease of notation, $\omega = \omega_e = \omega_{m1}p$ refers to the electrical rotor speed for the rest of this thesis. Writing the nonlinear continuous time dynamic system in established control theory\cite{RegelTech} \cite{mpcRawlings} notation leads to the following :
 \begin{equation}
 	\begin{split}
 		\Dot{\x}_c  &= \bm{f}(\bm{x}_c,\bm{u}_c,\omega )\\
@@ -95,10 +94,10 @@ And approximate the dynamics \eqref{equ:2_apv_cs_ss} using a first-order Taylor 
 Analyzing the nonlinear system \eqref{equ:2_apv_ss}, it can be seen that th only non-linearity stems from the induced voltage  $\bm{E}_c(\omega(t))$ , which is proportional to the scheduling parameter $\omega$. As shown in Section \ref{sec:modelling}, the dynamics of the mechanical system are slower than the electrical dynamics, assuming $\omega(t)$ is slowly varying relative to the sampling period $T_S$. Therefore, introducing step-wise linearization only leads to increased complexity without reducing the computational effort.\\
 
 
-Thus, it was decided to use the affine prediction model of Equation \eqref{equ:2_apv_ss} directly. This approach is also typically used in literature \cite{TOMPFC1}. %TODO: cite  noch viele andere
+Thus, it was decided to use the affine prediction model of Equation \eqref{equ:2_apv_ss} directly. This approach is also typically used in modern MPC PMSM literature \cite{TOMPFC1} \cite{XuchenPMSMiObs} \cite{ofmpcDistObs}. %TODO: cite  noch viele andere
 
 \subsection{Discretization}
-Due to its simplicity, Forward Euler discretization shall be considered. This approach conserves stability, when the sampling time $T_S$ is sufficiently small. The mapping of continuous time eigenvalues to discrete time eigenvalues $\underline{s}_i = a + \J b \rightarrow \underline{z}_i$ is described as
+Due to its simplicity, Forward Euler discretization shall be considered. This approach conserves stability, when the sampling time $T_S$ is sufficiently small. The mapping of continuous time eigenvalues to discrete time eigenvalues $\underline{s}_i = a + \J b \; : \; a,b \in \mathbb{R} \rightarrow \underline{z}_i$ is described as
 \[
 \underline{z}_i = 1 + T_S \underline{s}_i
 \]
@@ -115,8 +114,7 @@ With the eigenvalue analysis of Section \ref{sec:modelling} and $T_S \le \qty{20
 	\boldsymbol{A}(\omega[k]) &= \boldsymbol{I} + T_S\boldsymbol{A}_c(\omega(kT_S)) \quad \boldsymbol{B} = T_S \boldsymbol{B}_c \quad \\  
 	\boldsymbol{E}(\omega[k]) &= \boldsymbol{E}_c (\omega(kT_S)) 
 \end{align*}
-In literature the actuating signal is often split up as $ \bm{u}[k]=\bm{u}[k-1] + \bm{\Delta u}[k]$. This offers benefits as it eases the stability analysis 
-or improves some aspects of robustness as shown in Section \ref{sec:mpcc_comp} (Page \pageref{sec:mpcc_comp}). So, the discrete time-model for prediction is given by Equation \eqref{equ:2_apv_tk}.
+In literature the actuating signal is often split up as $ \bm{u}[k]=\bm{u}[k-1] + \bm{\Delta u}[k]$. This mainly offers benefits as it eases the stability analysis  \cite{mpcCamacho} \cite{mpcRawlings}. So, the discrete time-model for prediction is given by Equation \eqref{equ:2_apv_tk}.
 \begin{equation}
 	\begin{split}
 		\x [k+1] &= \Aw \x[k] + \B (\bm{u}[k-1] + \bm{\Delta u}[k] ) + \Ew \\
@@ -138,8 +136,8 @@ or improves some aspects of robustness as shown in Section \ref{sec:mpcc_comp} (
 	\label{equ:2_apv_tk}
 \end{equation}
 
-\subsection{Prediction Horizon}
-In model predictive one distinguishes between the prediction horizon $N_P$, which describes how many discrete steps in time the dynamics are predicted and the control horizon $N_C$, which is the amount of optimal actuating signal are computed at every step. With $N_C \le N_P$ % TODO: maybe move this to the intro
+\subsection{Prediction Horizon} \label{sec:prediction_horizon}
+In model predictive control one distinguishes between the prediction horizon $N_P$, which describes how many discrete steps in time the dynamics are predicted and the control horizon $N_C$, which is the amount of optimal actuating signal are computed at every step (w)ith $N_C \le N_P$). % TODO: maybe move this to the intro
 Within the scope of this thesis, typically field-oriented current control sampling times of $T_S \in [5,\, 20]\;\si{kHz}$ are considered. To get an optimal trade off between model fault tolerance, tracking performance and computational effort a typical prediction horizon of $N_P \le 3$  with $N_P = N_C$ are considered.\\
 To obtain a prediction for  $\x[k+l]\; l\in \mathbb{N}\;:\; l\le N_P $ , Equation \eqref{equ:2_apv_tk} is iterated one step ahead.
 \begin{align*}
@@ -247,7 +245,7 @@ With $\Bar{\bm{g}}[k]$ being parameter variant, but independent of $\Deltaub$. F
 % integral Behavior, ref to deadtime compensation
 
 \section{Optimization Problem}
-The vector of the voltage increment at the current step in time and its predictions up to the $N_P$th step shall be determined optimal with respect to a certain cost function $J$ and constraints regarding the stator voltage and the predicted current response, such that the determined stator voltage can be physically applied without damaging the machine. For the actuating signal $\Bar{\bm{u}_S}[k]$, this means it has to be bounded by the voltage hexagon and the magnitude of each $\Bar{\bm{i}_S}[k+1]$ must not exceed the current limit $I_max$. Doing so, leads to a general description for MPC for PMSM, similar to the one used in \cite{TOMPFC1}.
+The vector of the voltage increment at the current step in time and its predictions up to the $N_P$th step shall be determined optimal with respect to a certain cost function $J$ and constraints regarding the stator voltage and the predicted stator current response, such that the determined stator voltage can be physically applied without damaging the machine. For the actuating signal $\Bar{\bm{u}_S}[k]$, this means it has to be bounded by the voltage hexagon and the magnitude of each $\Bar{\bm{i}_S}[k+1]$ must not exceed the current limit $I_{max}$. Doing so, leads to a general description for MPC for PMSM, similar to the one used in \cite{TOMPFC1}.
 \begin{align*}
 	\Bar{\bm{\Delta u}_S}[k]^* = \arg \min_{\Bar{\bm{\Delta  u}_S}}\; &J(\boldsymbol{u}_{S}[k], \boldsymbol{i}_{S}[k], \boldsymbol{i}_{S,ref}[k+1])\\
 	 \text{s.t.} \quad \hat{\boldsymbol{i}}_{S}[k+1] \in \mathbb{I}_S &= \{\boldsymbol{i}_{S} \in \mathbb{R}^2 :\|\boldsymbol{i}_{S}^R[k+1]\|_2 \leq {I}_{max} \} \\
@@ -274,19 +272,19 @@ Since the controller operates within the RRF, the relation for the voltage const
 	\label{equ:2_QP}
 \end{split}
 \end{equation}
-with the Hessian of the cost function being positive definite $\nabla_{\Deltaub}^2 J = \bm{\Gamma}  \succ 0 $ to ensure convexity.
+with the Hessian matrix of the cost function being positive definite $\nabla_{\Deltaub}^2 J = \bm{\Gamma}  \succ 0 $ to ensure convexity.
 
 \subsection{Cost Function}
 For the cost function $J$, a simple LQR-style base cost is employed. With $\bm{Q} \in \mathbb{R}^{N_P q\times N_P q}$ as the diagonal weighting matrix for the tracking error and $\bm{R} \in \mathbb{R}^{N_P m\times N_P m} $ the diagonal weighting matrix  for the stator voltage increment. For the application of electric drives, reference tracking is significantly more important then the magnitude of the stator voltage.
 \begin{equation*}
 J = \left(\; \bm{\Bar{i}} [k+1] - \boldsymbol{\Bar{i}}_{ref} [k+1] \; \right)^\T \boldsymbol{Q} \left(\; \boldsymbol{\Bar{i}} [k+1] - \boldsymbol{\Bar{i}}_{ref} [k+1]\; \right) + \left(\Deltaub \right)^\T \; \boldsymbol{R} \; \Deltaub
 \end{equation*}
-Or with a more compact notation $\wLNorm{x}{I} = \x^\T \I \x$  :
+Or with the more compact $\mathcal{L}_2$-norm notation $\wLNorm{x}{I} = \x^\T \I \x$  :
 \begin{equation}
 	J = \| \bm{\Bar{i}}  - \bm{\Bar{i}}_{ref} \|_{Q}^2  + \wLNorm{\Bar{\boldsymbol{\Delta u}}}{R}
 	\label{equ:2_J}
 \end{equation}
-To express the cost $J$ in terms of $\Deltaub$, the prediction for the current as output signal is expressed by the prediction based on $\Sigma: \left[\bm{A}(\omega[k]),\bm{B},\bm{E}(\omega[k])\right]$ according to Equation \eqref{equ:2_prediction}. 
+To express the cost $J$ in terms of $\Deltaub$, the prediction for the current as output signal is expressed by the prediction based on the system $\Sigma: \left[\bm{A}(\omega[k]),\bm{B},\bm{E}(\omega[k])\right]$ according to Equation \eqref{equ:2_prediction}. 
 \[
 \Bar{\bm{i}}[k+1]  = \Bar{\bm{y}}[k+1] = \Bar{\bm{g}}[k] + \predDeltaU \Deltaub
 \]
@@ -434,7 +432,7 @@ and the upper right border, with a slope of $-\pi/3$ by
 	u_\beta \le -{\sqrt{3}} u_\alpha + \frac{2\;U_{DC}}{\sqrt{3}}
 	\label{equ:constr_Nu2}
 \end{equation}
-Both of the inequalities \eqref{equ:constr_Nu1} and \eqref{equ:constr_Nu2} describe convex sets. Continuing this construction of the voltage hexagon for all six borders, leads to a sixfold convex intersection of half-planes as in \cite{LMIVHex}, which describes the voltage hexagon. Combining those six relations leads to the set of Linear Inequalities in SRF \eqref{equ:constraint_U_SRF}.
+Both of the inequalities \eqref{equ:constr_Nu1} and \eqref{equ:constr_Nu2} describe convex sets. Continuing this construction of the voltage hexagon for all six borders, leads to a sixfold convex intersection of half-planes as in \cite{LMIVHex} \cite{NeunerMA}, which describes the voltage hexagon. Combining those six relations leads to the set of Linear Inequalities in SRF \eqref{equ:constraint_U_SRF}.
 \begin{equation}
 	\scriptstyle 
 	\underbrace{
@@ -544,7 +542,7 @@ Or in more detail:
 	\label{equ:constaintU_full_SRF}
 \end{align*}
 
-As a final step, to arrive at an LMI in terms of $\Deltaub$, Equation \eqref{equ:u_constr_SRF} must be rearranged to:
+As a final step, to arrive at a set of linear inequalities in terms of $\Deltaub$, Equation \eqref{equ:u_constr_SRF} must be rearranged to:
 \[
 \Bar{\bm{N}}_u^S \predipark \bm{P}_T\bm{\Delta u}_S^R[k]  \le \Bar{\bm{\nu}}^S_u - \Bar{\bm{N}}_u^S \predipark (\bm{1}_{N_P} \otimes \bm{I}_2)\bm{u}_S^R[k-1] 
 \]
@@ -586,7 +584,7 @@ To ensure safe operation, the current space vector must not exceed its limit $I_
 	\|\bm{i}_S^S\|_2 \le I_{max} \iff \|\bm{i}_S^R\|_2 \le I_{max}
 	\label{equ:2_constraints_I_sv}
 \end{equation}
-In order to allow for short-term violation of this constraint, similar to $I^2t$ safety protections, soft constraints are introduced in Section \ref{sec:mpcc_ext_sc}.\\
+In order to allow for short-term violation of this constraint, comparable to $I^2t$ safety protection schemes, soft constraints are introduced in Section \ref{sec:mpcc_ext_sc}.\\
 The Constraint \ref{equ:2_constraints_I_sv} describes a disk on the complex plane. In a lot MPC literature
 this is approximated by a polygon, to allow for a constraint description as a finite set of linear inequality constraints. However, this usually leads to a high amount of inequalities \cite{NeunerMA}.  %TODO: cite andere
 One approach to reduce that, it so introduce parameter-varying constraints, as in \cite{TOMPFC1}.
@@ -695,13 +693,37 @@ This equation is the rearranged in terms of $\bm{M}_i \Deltaubsr \le \bm{\mu}_i$
 \underbrace{\Bar{\bm{N}}_i^R\predDeltaU}_{\bm{M}_i} \Bar{\bm{\Delta u}}^R_S[k] \le \underbrace{\bm{\Bar{\nu}}^R_i - \Bar{\bm{N}}_i^R \Bar{\bm{g}[k]}}_{\bm{\mu}_i}
 \]
 
-\subsubsection{Reduced Order Parameter-Variant Constraints}
-\subsection{Solver}
+\subsubsection{Reduced Order Time-Variant Constraints}
+Another idea is proposed in the context fo the time-optimal model predictive flux controller from a group of researches at the University of Paderborn \cite{TOMPFC1}. Here, the circular current constraint are approximated by a tangent normal to the time-variant current space vector $\bm{i}^R_S$ as seen in Figure \ref{fig:2_tompfc_ltv_iconstraints}. The radius of that constraint is dynamically set at an higher level by an operating point controller, such that for short-term transient events are allowed to violate the steady-state maximum current $I_{max,dyn}[k] \ge I_{max}$. This thesis explores an approach for dynamic current constraints based on a slackness variable (See Section \ref{sec:mpcc_ext_sc}).
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.9\linewidth]{Figs/tompfc_ltv_iconstraints.png}
+	\caption{Linear time-variant current constraints. Image source: \cite{TOMPFC1}}
+	\label{fig:2_tompfc_ltv_iconstraints}
+\end{figure}
+
+A seen in Figure \ref{fig:2_tompfc_ltv_iconstraints}, an additional time-variant halfspace constraint is introduced, which aims to mitigates nonmonotic torque due to positive reference $i_d$ currents. \cite{TOMPFC1} \\
+
+\subsection{Hildreth's Quadratic Programming Procedure}
+
+The Quadratic Program \eqref{equ:2_QP} is solved using Hildreth's Quadratic Programming Procedure, as recommended in \cite{mpcWang}, due to its benefits for real-time optimization problems. The iterative solver employs the basis vectors as search directions, in contrast to the Newton approach, which determines a search direction based on the Hessian matrix of the cost function, $\nabla^2 J = \bm{\Gamma}$. Therefore Hildreth's procedure performs an element-by-element search, where only one Lagrange multiplier is updated at each step. \\
+Some of the key advantages of Hildreth's procedure are:
+\begin{description}
+	\item[Solution improves monotonically]: If a feasable solution exists, successive iterations are guaranteed converge towards the optimum.
+	\item[Fixed computational effort]: The number of iterations can be limited due the monotonic improvement.
+	\item[Element by element search]: No matrix inversion is required. This reduces the computational burden.
+\end{description}
+For a detailed description of this procedure in MPC applications refer to the MPC Book by L. Wang \cite{mpcWang}.
 
 \section{MPC Formulations}
+For field-oriented current control applications, three different MPC formulations are compared. The first one, referred to here as the Basic MPC, is based on \cite{mpcCamacho} \cite{mpcRawlings} and is often used in the literature due to its straightforward implementation.\\
+The second approach utilizes an augmented incremental state-space system in order to embed an integrator directly into the controller structure, as proposed in \cite{mpcWang}.\\
+The third can be thought of as a hybrid approach combining the previous two formulations, in order to obtain an embedded integrator while retaining a similar implementation to the Basic MPC. As will be shown, this is beneficial for extensions, such as those described in Section \ref{sec:mpcc_ext}.\\
+It is worth mentioning that, for LTI systems, so-called offset-free MPC can be used to guarantee the rejection of constant disturbances. In the classical approach this is achieved by estimating the disturbances as an additional state with a constant dynamic $\hat{d}[k+1] = \hat{d}[k]$. For reference, see chapter 5 of \cite{mpcRawlings} or the summary paper \cite{ofmpcBM} , which builds on the original work presented in \cite{ofmpcPGR}. However, since a nonlinear prediction model was chosen for this application, some of the key assumptions made in those publications cannot be satisfied. This problem was recognized and the approach presented in \cite{ofmpcDistObs} mitigates this by estimating multiple disturbances for the application of FOC for PMSM.  
 \subsection{Basic MPC}\label{sec:mpcc_mpc_basic}
 The prediction according to Equation \eqref{equ:2_prediction} uses absolute states $\x[k]$ and differential actuating signal $ \bm{\Delta u}[k] = \bm{u}[k]-\bm{u}[k-1] $. This enables the utilization of a commonly used MPC structure, as described in Section 2.3 of \cite{mpcCamacho}, which is depicted in Figure \ref{fig:OaC_MPC}. \\
-\begin{figure}[H]
+\begin{figure}[h]
 	\centering
 	\include{tikz/OaC_MPC.tex}
 	\caption{MPC structure used in \cite{mpcCamacho} with the notation used in this thesis}
@@ -788,7 +810,7 @@ Applying the incremental state accumulation as in Equation \eqref{equ:2_augmente
 				\Aw & \bm{0} \\
 				\bm{C} \Aw & \bm{I}
 			\end{bmatrix}
-		}_{\Aw_{\Delta}}
+		}_{\bm{A}_{\Delta}(\omega[k])}
 		\underbrace{
 			\begin{bmatrix}
 				\bm{\Delta x}[k] \\
@@ -826,7 +848,7 @@ Applying the incremental state accumulation as in Equation \eqref{equ:2_augmente
 	\label{equ:2_augmented_pmsm}
 \end{equation}
 
-Apart from the ambiguity regarding ${{\Delta \omega}}$, implementing constraints with incremental quantities for $\Aw$ and $\Ew$ proved to introduce additional complexity.\\
+Apart from the ambiguity regarding prediction assumptions for ${{\Delta \omega}}$, implementing constraints or extensions (Section \ref{sec:mpcc_ext}) with incremental quantities for states, $\Aw$ and $\Ew$ proved to introduce additional complexity.\\
 
 For the implementation of this augmented system, one has to obtain the incremental state change $\bm{\Delta x} [k] $. This is accomplished by the filter $1-z^{-1}$. To calculate the constraints and tracking error, $u[k-1]$ and $x[k]$ are needed. This results into the controller structure shown in Figure \ref{fig:Wang_MPC}.
 
@@ -837,7 +859,7 @@ For the implementation of this augmented system, one has to obtain the increment
 	\label{fig:Wang_MPC}
 \end{figure}
 
-The advantage of this approach, which introduces integrating behavior, is accompanied by the disadvantages of incremental states.
+The advantage of this approach, which introduces integrating behavior, is accompanied by the additional complexity due incremental states for prediction.
 
 \subsection{Hybrid Approach}\label{sec:mpcc_mpc_hybrid}
 Since the basic MPC formulation does not inherently guarantee offset-free tracking under output disturbances, such as model faults and the embedded integrator according to Wang hinders extensions and constraint formulations due to its incremental states, a way searched to combine the benefits of those two approaches. \\
@@ -876,7 +898,8 @@ For the affine, parameter-varying prediction model $\Ew$ has to be considered as
 The dynamic behavior of this approach will be analyzed and compared to the other two formulations in the Section \ref{sec:mpcc_analysis}.
 
 \section{Analysis of the Controller Structure}\label{sec:mpcc_analysis}
-Ziel: Integrales Verhalten und Sprungfähigkeit analysieren
+The main objective of this Section is to analyze the effect of constant disturbances such as model faults on the reference tracking of the controller. Since for the scope of this thesis, the stator current relation of the PMSM according to Equation \eqref{equ:1_apv_ss}, will be the only plant considered it is deemed sufficient to only analyze the three different controller structures.
+
 \subsection{Closed-Loop Structure with inactive Constraints}
 For the unconstrained case, the  Quadratic Program can be solved offline by finding the stationary points of $J$ with respect to $\Deltaub$:
 
@@ -965,9 +988,11 @@ By deriving the transfer function matrix $\bm{v} \rightarrow \bm{y}$ for frozen 
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=1\linewidth]{Figs/2_basic_mpc_mimo_tfs}
-	\caption{Frequency response for the unconstrained Basic MPC.}
+	\caption{Discrete-time frequency response for the unconstrained Basic MPC.}
  	\label{fig:2_basic_mpc_mimo_tfs}
 \end{figure}
+
+The different frozen transfer functions are fairly similar, with their magnitude response differing in the sub-dB range. Thus, they appear to be nearly identical in Figure \ref{fig:2_basic_mpc_mimo_tfs}.
 
 \subsubsection{Unconstrained Hybrid MPC for LPV Systems}
 Again, to improve the readability of this section, the parameter dependencies $\omega$ are not explicitly stated.\\
@@ -1087,10 +1112,11 @@ The obtained frequency responses for $\omega \in [-1\; -0.5 \; 0 \; 0.5 \; 1] \c
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=1\linewidth]{Figs/2_hyb_mpc_mimo_tfs}
-	\caption{Frequency response for the unconstrained Hybrid MPC.}
+	\caption{Discrete-time frequency response for the unconstrained Hybrid MPC.}
 	\label{fig:2_hyb_mpc_mimo_tfs}
 \end{figure}
 
+The different frozen transfer functions are fairly similar, with their magnitude response differing in the sub-dB range. Thus, they appear to be nearly identical in Figure \ref{fig:2_hyb_mpc_mimo_tfs}.
 
 \subsubsection{Unconstrained MPC with Embedded Integrator for LPV Systems}
 
@@ -1166,18 +1192,376 @@ Again, the controller's system matrix $\bm{A}_{C,ei}$ of Equation \eqref{equ:2_s
 
 With that the integrating behavior in the unconstrained operation can be directly observed.
 
+\subsection{Comparison of the MPC Formulations with inactive Constraints}
+The Basic MPC stores the last control signal $\bm{u}[k-1]$ and uses it directly for the prediction. This results directly in feedback structure of the accumulator $z/(z-1)$ as seen in Figure \ref{fig:Basic_MPC_unconstrained}. As confirmed by the eigenvalue and transfer function analysis this results in low-pass behavior. Therefore this approach does not guarantee offset-free tracking under constant disturbances such as model faults. Section \ref{sec:mpcc_ext_is} introduces an extension of this formulation for integral behavior. However, as it will be shown, this extension requires anti-windup measures for implementation on real hardware.\\
+Using an augmented incremental state space system  $\Sigma_\Delta: \left(\bm{A}_\Delta, \bm{B}_\Delta, \bm{C}_\Delta,\right)$ according to Wang \cite{mpcWang} the accumulator is in direct series connection to the input of the plant. However, the augmented state space system $\Sigma_\Delta$ with the augmented state vector ${\bm{\xi}_{\Delta}[k]} = [\Delta \x[k]\; \bm{y}[k]]^\T$ hinders the flexibility of this formulation for extensions, such as the ones presented in the following Section.\\
+To ensure integral behavior and use absolute states $\bm{x}$ the direct feedback of the accumulator was interrupted by estimating the previous control signal $\tilde{\bm{u}}[k-1] = \bm{B}^{-1}\left(\bm{x}[k] - \bm{A}\bm{x}[k-1] \right)$ which can be thought of as the actual last control signal disturbed by an input disturbance $\tilde{\bm{u}}[k-1]  = \bm{u} [k-1] + \bm{d}_1[k-1]$. This formulation is untypical, since it requires $\bm{B}^{-1}$ which is in general not guaranteed to exist, but poses no issues for the model of the PMSM $\eqref{equ:2_apv_tk}$. As seen by the transfer functions of Figure \ref{fig:2_hyb_mpc_mimo_tfs} and the spectrum of the controller dynamic matrix, this leads to integral action. With that, offset free tracking under constant disturbances is ensured.\\
+If the MPC operates with active constraints, the high frequency dynamics might be worth studying to gain insight if one of those 3 approaches tends to less robust behavior with respect to model and timing uncertainties. For that the Bode Plots \ref{fig:2_basic_mpc_mimo_tfs} and \ref{fig:2_basic_mpc_mimo_tfs} are consulted. Looking at high frequencies within the sampling limit $ \qty{5}{kHz} \le f <  T_S^{-1}/2$, the magnitude attenuation of the Hybrid formulation is close to identical to the Basic formulation.
 
-\subsection{Closed-Loop Structure with active Constraints}
-\subsection{Prediction Error Propagation}
-\subsection{Integral Behavior}
+\section{Extensions} \label{sec:mpcc_ext}
+Three extensions for the model-predictive field oriented control of PMSM where chosen. First the issue of computation and switching delay is addressed with deadtime compensation. Section \ref{sec:ext_deadt_comp} describes the well-established approach for one-step compensation. Chapter \ref{ch:ipred} explores methods to compensate for fractional delays.\\
+Since the Basic MPC formulation according to \cite{mpcCamacho} does not compensate for e.g. model faults, an extension is presented which solves this by considering the integral tracking error in the cost function.\\
+Finally, to allow for short-term violations of current limits, soft constraints are introduced.
 
-%\section{Chose of Reference}
+\subsection{Deadtime Compensation} \label{sec:ext_deadt_comp}
+For clarity, the prediction notation $u[i|j]$ is introduced, where $i, j \in \mathbb{Z}$. Here, $i$ denotes the time of application or measurement of the variable, and $j$ denotes the time of information acquisition or computation. Thus, for example, $u[k+1|k]$ is the control variable calculated at time $k$, which takes effect starting at $k+1$.\\
 
-\section{Extensions}
-\subsection{Deadtime Compensation}
+Due to the one-step input delay of the computation of the PWM's duty cycle, the control variable $u[k+1|k]$ calculated at time $k$ does not influence the transition from $k$ to $k+1$, but rather the transition from $k+1$ to $k+2$. Therefore, the MPC prediction does not begin with $\hat{y}[k+1|k]$, but with $\hat{y}[k+2|k]$. The starting point is the known intermediate prediction based on $\SigmaApvTk$.
+
+\begin{equation}
+	\hat{\bm{x}}[k+1|k] = \Aw \bm{x}[k|k] + \bm{B}\bm{u}[k|k-1] + \Ew
+	\label{equ:delComp_sys_model}
+\end{equation}
+
+where $\boldsymbol{u}[k|k-1]$ is the control variable calculated in the previous sampling step and now in effect. The optimization variable thus starts at $\Delta \boldsymbol{u}[k+1|k]$, and the first predicted output influenced by it is $\hat{\boldsymbol{y}}[k+2|k].$\ \
+
+Delay compensation affects both the control variable calculation and the transformation from the rotor-fixed to the stator-fixed coordinate system $dq \rightarrow \alpha\beta$. Due to the equidistant, PWM-synchronous sampling, the pre-calculated angle
+\[
+\hat{\varphi}_e[k+1|k] = \varphi_e[k|k] + T_S \omega_e[k|k]
+\]
+is used instead.\\
+
+At time $k$, because $\boldsymbol{C}=\boldsymbol{I}$, the output $ \boldsymbol{y}[k|k]=\boldsymbol{x}[k|k] $ is measured. Based on this, the MPC calculates the output sequence
+\[
+\left\{\hat{\boldsymbol{y}}[k+2|k],\dots,\hat{\boldsymbol{y}}[k+N_P|k]\right\}
+\]
+for the control input sequence
+\[
+\left\{\Delta \boldsymbol{u}[k+1|k],\dots,\Delta \boldsymbol{u}[k+N_C|k]\right\}
+\]
+and determines $\boldsymbol{u}[k+1|k]$ from this by minimizing the cost function \eqref{equ:2_J}. The measurement result $\boldsymbol{y}[k+1|k+1]$ is still determined by the control input $\boldsymbol{u}[k|k-1]$ that is already active; the newly calculated control input $\boldsymbol{u}[k+1|k]$ takes effect only in the following sampling interval.
+
+\subsubsection{Implementation}
+The objective of the Quadratic Program is to determine the prediction vector $\Deltaub$. This vector is composed of:
+
+\begin{align*}
+	\Bar{ \boldsymbol{\Delta u}}^*[k] = \begin{bmatrix}
+		{ \boldsymbol{\Delta u}}^*[k] \\
+		{ \boldsymbol{\Delta u}}^*[k+1]\\
+		\vdots\\
+		{ \boldsymbol{\Delta u}}^*[k+N_C-1]
+	\end{bmatrix}
+	= 
+	\begin{bmatrix}
+		\Delta u_d^*[k] \\
+		\Delta u_q^*[k] \\
+		%\hdashline
+		\Delta u_d^*[k+1] \\
+		\Delta u_q^*[k+1] \\
+		%\hdashline 
+		\vdots  \\
+		%\hdashline 
+		\Delta u_d^*[k+N_C-1] \\
+		\Delta u_q^*[k+N_C-1] 
+	\end{bmatrix}
+\end{align*}
+
+To compensate the deadtime, the optimization target must be 
+\begin{align*}
+	\Bar{ \boldsymbol{\Delta u}}^*[k+1|k] = \begin{bmatrix}
+		{ \boldsymbol{\Delta u}}^*[k+1|k]\\
+		\vdots\\
+		{ \boldsymbol{\Delta u}}^*[k+N_C-1|k]
+	\end{bmatrix}
+\end{align*}.
+
+with that, the new cost function is 
+
+\begin{equation}
+	J_{\mathrm{dtc}}
+	=
+	\left\|
+	\Bar{\boldsymbol{y}}[k+2]
+	-
+	\Bar{\boldsymbol{r}}[k+2]
+	\right\|_{\bm{Q}}^2
+	+
+	\left\|
+	\Bar{\boldsymbol{\Delta u}}[k+1|k]
+	\right\|_{\bm{R}}^2
+	\label{equ:delComp_J_compact}
+\end{equation}
+
+To achieve this, the prediction equation \eqref{equ:2_prediction} must be modified according to:
+
+\begin{equation}
+%	\Bar{\bm{y}}[k+2|k]
+%	=
+%	\underbrace{
+%		\Tilde{\bm{P}}_{x}\Bar{\bm{x}}[k]
+%		+
+%		\Tilde{\bm{P}}_{u}\bm{u}[k|k-1]
+%		+
+%		\Tilde{\bm{P}}_{E}  \Ew
+%	}_{=:\Bar{\Tilde{\bm{g}}}[k+1|k]}
+%	+
+%	\Tilde{\bm{P}}_{\Bar{\bm{\Delta u}}}
+%	\Bar{\bm{\Delta u}}[k+1|k]
+\Bar{\boldsymbol{y}}[k+2|k] = \underbrace{ \Tilde{\boldsymbol{P}}_{x} \hat{\boldsymbol{x}}[k+1|k]
+	+ \Tilde{\boldsymbol{P}}_u \boldsymbol{u}[k|k-1] + \Tilde{\boldsymbol{P}}_{E\omega}\Bar{\boldsymbol{E}}(\hat{\omega}[k+1|k]) }_{=:\Bar{\boldsymbol{g}}[k+1|k]} + \Tilde{\boldsymbol{P}}_{\Bar{\Delta u}} {\Bar{\boldsymbol{\Delta u}}}[k+1|k] 
+	\label{equ:2_prediction_dtc}
+\end{equation}
+
+Or in more detail:
+
+\begin{equation}
+	\begin{aligned}
+		&\underbrace{
+			\begin{bmatrix}
+				\hat{\bm{y}}[k+2] \\
+				\vdots \\
+				\hat{\bm{y}}[k+D_s]
+			\end{bmatrix}
+		}_{\Bar{\bm{y}}[k+2|k]}
+		=
+		\underbrace{
+			\begin{bmatrix}
+				\bm{C}\left(\Aw\right)^2 \\
+				\vdots \\
+				\bm{C}\left(\Aw\right)^{D_s}
+			\end{bmatrix}
+		}_{\Tilde{\bm{P}}_x}
+		\Bar{\bm{x}}[k]
+		+
+		\underbrace{
+			\begin{bmatrix}
+				\bm{C}\left(\Aw+\I\right)\B \\
+				\vdots \\
+				\bm{C}\left(\displaystyle\sum_{l=0}^{D_s-1}
+				\left(\Aw\right)^l\right)\B
+			\end{bmatrix}
+		}_{\Tilde{\bm{P}}_u}
+		\bm{u}[k|k-1]
+		\\[1ex]
+		&\quad+
+		\underbrace{
+			\begin{bmatrix}
+				\bm{C}\left(\bm{A}(\omega[k])+\bm{I}\right)\bm{B}
+				&
+				\bm{C}\bm{B}
+				&
+				\cdots
+				&
+				\bm{0}_2
+				\\[0.5ex]
+				\bm{C}\left(
+				\left(\bm{A}(\omega[k])\right)^2
+				+\bm{A}(\omega[k])
+				+\bm{I}
+				\right)\bm{B}
+				&
+				\bm{C}\left(\bm{A}(\omega[k])+\bm{I}\right)\bm{B}
+				&
+				\ddots
+				&
+				\vdots
+				\\
+				\vdots
+				&
+				\vdots
+				&
+				\ddots
+				&
+				\bm{0}_2
+				\\
+				\bm{C}\left(
+				\displaystyle\sum_{l=0}^{D_s-1}
+				\left(\bm{A}(\omega[k])\right)^l
+				\right)\bm{B}
+				&
+				\bm{C}\left(
+				\displaystyle\sum_{l=0}^{D_s-2}
+				\left(\bm{A}(\omega[k])\right)^l
+				\right)\bm{B}
+				&
+				\cdots
+				&
+				\bm{C}\bm{B}
+			\end{bmatrix}
+		}_{\Tilde{\bm{P}}_{\Bar{\bm{\Delta u}}}}
+		\underbrace{
+			\begin{bmatrix}
+				\boldsymbol{\Delta u}[k+1] \\
+				\vdots \\
+				\boldsymbol{\Delta u}[k+D_s-1]
+			\end{bmatrix}
+		}_{\Bar{\bm{\Delta u}}[k+1|k]}
+		\\[1ex]
+		&\quad+
+		\underbrace{
+			\begin{bmatrix}
+				\bm{C}\left(\Aw+\I\right) \\
+				\vdots \\
+				\bm{C}\left(
+				\displaystyle\sum_{l=0}^{D_s-1}
+				\left(\Aw\right)^l
+				\right)
+			\end{bmatrix}
+		}_{\Tilde{\bm{P}}_E}
+		\Ew .
+	\end{aligned}
+	\label{equ:prediction_full_dtc}
+\end{equation}
+
+Where $D_s$ are the number of decision steps and is given by $D_S = N_P - 1$.
+
+\subsubsection{Comparison across the three MPC Formulations}
+
+For the simulation, the PMSM Model \eqref{equ:1_apv_ss} with parameters of the machine at TUG (see Table \ref{tab:params_NW3}) was simulated in a locked rotor scenario at $\omega_m = 0$ rad/s. For this simulation, an ideal pulse-amplitude modulation is employed and the MPC is built on a perfect model of the machine. The tuning parameters used for this simulation, can be obtained from Table \ref{tab:typ_params_mpcc}. The voltage limit was set to $U_{DC} = 50 \sqrt{3})$ V, in order to test constraint operations as well. For this parameter set, the voltage constraint will be active for approximately $\qty{5}{\micro s}$ after positive reference step and $\qty{7}{\micro s}$ after the negative step. Each of those simulation is also conducted with active and inactive current soft constraints, to check the effect of the deadtime compensation on that as well.
+
+\begin{figure}[H]
+	\centering
+	\begin{subfigure}[b]{0.4\textwidth}
+		\includegraphics[width=\textwidth]{Figs/2_basic_deadtcomp_iunconstr}
+		\caption{Soft constraint $I_{max} = \qty{12}{A}$}
+	\end{subfigure}
+	\hspace{0.05\textwidth}
+	\begin{subfigure}[b]{0.4\textwidth}
+		\includegraphics[width=\textwidth]{Figs/2_basic_deadtcomp_iconstr}
+		\caption{Soft constraint $I_{max} = \qty{9}{A}$}
+	\end{subfigure}
+	\caption{Simulated step responses for deadtime scenarios with the Basic MPC}
+	\label{fig:2_dtc_sim_basis}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\begin{subfigure}[b]{0.4\textwidth}
+		\includegraphics[width=\textwidth]{Figs/2_wang_deadtcomp_iunconstr}
+		\caption{Soft constraint $I_{max} = \qty{12}{A}$}
+	\end{subfigure}
+	\hspace{0.05\textwidth}
+	\begin{subfigure}[b]{0.4\textwidth}
+		\includegraphics[width=\textwidth]{Figs/2_wang_deadtcomp_iconstr}
+		\caption{Soft constraint $I_{max} = \qty{9}{A}$}
+	\end{subfigure}
+	\caption{Simulated step responses for deadtime scenarios with the Embedded Integrator MPC due to Wang}
+	\label{fig:2_dtc_sim_wang}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\begin{subfigure}[b]{0.4\textwidth}
+		\includegraphics[width=\textwidth]{Figs/2_hyb_deadtcomp_iunconstr}
+		\caption{Soft constraint $I_{max} = \qty{12}{A}$}
+	\end{subfigure}
+	\hspace{0.05\textwidth}
+	\begin{subfigure}[b]{0.4\textwidth}
+		\includegraphics[width=\textwidth]{Figs/2_hyb_deadtcomp_iconstr}
+		\caption{Soft constraint $I_{max} = \qty{9}{A}$}
+	\end{subfigure}
+	\caption{Simulated step responses for deadtime scenarios with the Hybrid MPC}
+	\label{fig:2_dtc_sim_hyb}
+\end{figure}
+
 \subsection{Integral State Augmentation for the Basic MPC} \label{sec:mpcc_ext_is}
-\subsubsection{Windup}
+
+\reminder{Diese Herangehensweise ist in der LV Optimization and Control vorgestellt worden}\\
+\reminder{Ich hab sie aber in den dort referenzierten "großen" MPC-Büchern \cite{mpcCamacho } \cite{mpcRawlings} nicht finden können}\\
+\reminder{Habe diesbzüglich e-mail ans IRT geschickt}
+
+The main idea is to calculate the accumulated tracking error with a designated dynamical system $\Sigma_z$ for each sampling step.
+\[
+\Sigma_z : \bm z[k+1] = \bm z[k] + (\bm y[k] - \bm r[k])
+\]
+Based on this system, the prediction for $\bm z[k+1]$ over $D_S$ is calculated. This prediction vector is then used as an additional quadratic term, weighted by an diagonal matrix $\bm{W}_I$ in the cost function, to minimize the integral error.
+\begin{equation}
+	J_{is} = \dots + \wLNorm{\bar{z}}{W_I}%(\Bar{\bm z}[k+1])^T W_I (\Bar{z}[k+1])
+	\label{equ:2_Jis}
+\end{equation}
+ To directly use this in the Quadratic Program \eqref{equ:2_QP}, the prediction vector $\bar{\bm{z}}[k+1]$ is expressed in terms of $\Deltaub$. Using a similar procedure as described in Section \ref{sec:prediction_horizon}, the prediction vector for $\bm z$ is calculated by 
+\[
+\Bar{\bm z}[k+1] = \underbrace{(\bm{1}_{N_P} \otimes \bm{I}_2) \bm{z}[k] + \bm{P}_T (\bm y[k] - \bm r[k])}_{:= \bm{\rho}_I \text{, known}} + \underbrace{ \bm{P}_T
+	\bm{P}_{\Delta u}}_{:=\bm{P}_I \text{, related to }\Deltaub} \cdot \Deltaub
+\]
+Where $P_T$ is lower triangular block matrix consisting of identity matrices as elements.\\ 
+Due to the separation of the term $\bm{\rho}_I$ and the $\bm{P}_I$, $\Bar{\bm z}[k+1] = \bm{\rho}_I + \bm{P}_I  \Deltaub$, can easily be inserted into the modfied cost function $J_{is}$ of Equation \eqref{equ:2_Jis}.
+\[
+J_{is} = \| \bm{\Bar{y}}  - \bm{\Bar{r}} \|_{\bm Q}^2  + \wLNorm{\Bar{\boldsymbol{\Delta u}}}{R} + \| \bm{\rho}_I + \bm{P}_I  \Deltaub \|_{\bm{W}_I}^2
+\]
+
+
+
+Defining the auxiliary terms
+\begin{align*}
+	\bm{\gamma}_I 	&= 2 \bm{\rho}_I^\T \bm{W}_I \bm{P}_I	\\
+	\bm{Q}_I 		&= \bm{P}_I^\T \bm{W}_I \bm{P}_I 		\\
+	\Tilde{\bm \gamma}^\T &= \bm{\gamma}^T + \bm{\gamma}_I^T \\
+	\Tilde{\bm \Gamma}  &= \predDeltaU^T (\bm{Q}  + \bm{Q_I}) \predDeltaU + \bm{R}
+\end{align*} 
+eases the augmentation such that the quadratic program with integral states can be expressed as
+
+\begin{equation}
+	\begin{split}
+		&\arg \min_{\Bar{\bm{\Delta  u}_S}}\;  \frac{1}{2} \| {\Deltaub} \|_{\tilde{\bm{\Gamma}}}^2 + \Tilde{\bm{\gamma}}^\T \Deltaub \\
+		\text{s.t.} & \quad 
+		{\bm{M}} \Deltaub\le {\bm{\mu}}
+		\label{equ:2_QP_is}
+	\end{split}
+\end{equation}
+
+The weighting matrix $\bm{W}_I$ is a tune-able factor. Figure \ref{fig:2_comp_Wi} illustrates the influence of $\bm{W}_I$ on the step response for $ \bm{0} \rightarrow \bm{i}_{S,ref} = [-2, 30]^\T$ A, considering  a mismatch between the parameters of the MPC and the actual machine.
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.95\linewidth]{Figs/2_comp_integralStateWheight.eps}
+	\caption{Comparison of the step responses for multiple values of $W_I$ considering model fault}
+	\label{fig:2_comp_Wi}
+\end{figure}
+
+\subsubsection{Remarks}
+Using this approach, integral action of the MPC can be ensured, without increasing the elements of optimization variables or sacrificing the Basic MPC formulation. However, if the MPC operates under active constraints and the tracking error cannot be fully compensated, the implicit integral error state $z$ will wind up. Looking at the cost function,
+
+\[
+J_{is} = \| \bm{\Bar{y}}  - \bm{\Bar{r}} \|_{\bm Q}^2  + \wLNorm{\Bar{\boldsymbol{\Delta u}}}{R} + \| \bm{z} \|_{\bm{W}_I}^2
+\]
+
+one can see that the quadratic form regarding $z$ will also grow in value.The solver of the quadratic program will still search for the vector $\Deltaub$ which minimizes that cost. Even though the effect of the weighting $\bm{Q,R}$ will still be considered, by that, numerical issues may arise due to that wind up effect. 
+
 \subsection{Soft Constraints} \label{sec:mpcc_ext_sc}
+\reminder{Dokumentation in Arbeit}
+%Using the compact L2-Norm Notation:
+%\[
+%\boldsymbol{\Bar{\Delta u}^\T}[k] \boldsymbol{Q} \boldsymbol{\Bar{\Delta u}}[k] = 
+%\| \Bar{\boldsymbol{\Delta u}}\|_{\boldsymbol{Q}}^2
+%\]
+Considering the slackness variable, integral error states, the total cost function can be written down:
+\[
+\Tilde{J} = \wLNorm{\Bar{y} - \Bar{r}}{Q}  + \wLNorm{\Bar{\Delta u}}{R} + \wLNorm{\Bar{z}}{W_I} + w_{\eta} \eta
+\]
+The vector  of optimization variables is extended by the slackness variable  $\boldsymbol{\Bar{\Delta u}} \rightarrow \bm{\zeta} = \begin{bmatrix}
+	\bm{\Bar{\Delta u}}^\T & \eta
+\end{bmatrix}^T$
+
+
+\begin{equation}
+	\begin{split}
+		\boldsymbol{\Bar{\Delta u}}^* = \footnotesize{\begin{bmatrix} 
+				1 & 0 & & 0\\
+				0& \ddots & &  \vdots\\
+				& 0& 1 & 0
+		\end{bmatrix}} &\arg \min_{\boldsymbol{\zeta}}
+		\bm{\zeta}^T \begin{bmatrix}
+			\Tilde{\bm{\Gamma}} & \bm{0} \\
+			\bm{0}^T & w_{\eta}
+		\end{bmatrix} \bm{\zeta} +
+		\begin{bmatrix}
+			\Tilde{\bm{\gamma}}^T & 0
+		\end{bmatrix} \bm{\zeta}
+		\\
+		\text{s.t. }& \begin{bmatrix}
+			\bm{M} & -\bm{\rho} \\
+			\bm{0}^T & 0
+		\end{bmatrix} 
+		\underbrace{\begin{bmatrix}
+				\Bar{\bm{\Delta u}}\\ \eta
+		\end{bmatrix}}_{\bm{\zeta}}
+		\leq \begin{bmatrix}
+			{\bm{\mu}} \\ /
+		\end{bmatrix}
+	\end{split}
+	\label{equ:extended_OP}
+\end{equation}
 
 \section{Experimental Evaluation}
 \subsection{Test Setup}
@@ -1195,5 +1579,5 @@ With that the integrating behavior in the unconstrained operation can be directl
 Analyzing  $\Sigma: \left(\bm{A}_c(\omega(t)),\Tilde{\bm{B}}_c \right)$ in the context of linear parameter-varying systems, the framework of LPV System according to \cite{lpvBriat}.
 one has to quantify the influence of the parameter $\omega$. Due to the balance of angular momentum of the motor shaft \eqref{equ:1_coupling}, the electrical rotor speed $\omega = \omega_e = \omega_{m1}p$ is Lipschitz-continuous. With the eigenvalues of the respective dynamical system \eqref{equ:1_coupling} being slower than \eqref{equ:2_apv_ss}, as discussed in Section \ref{sec:model_coupling}.
 
-
+\chapter{Observer based Current Prediction}\label{ch:ipred}
 
