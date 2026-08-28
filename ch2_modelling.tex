@@ -1,6 +1,61 @@
 \chapter{Modelling} \label{sec:modelling}
+\section{Space Vector Theory} \label{sec:0_sv} % TODO: move to intro
+Due to benefits regarding the mathematical modeling of electrical three-phase system, space vector are commonly used. The idea behind it, is to describe real-valued three-phase quantities as one complex-valued quantity. By doing so, a change of reference frames is easily achieved es and  an intuitive description of the magnitude and phase angle of a three-phase system is provided. \\
+
+For a balanced sinusoidal three-phase current system, the phase currents can be expressed as 
+
+\begin{equation*}
+	\begin{split}
+i_a(t) &= I_a\cos\omega t,\\
+i_b(t) &= I_b\cos\left(\omega t-\frac{2\pi}{3}\right),\\
+i_c(t) &= I_c\cos\left(\omega t+\frac{2\pi}{3}\right)
+	\end{split}
+\label{equ:0_current_sequence}
+\end{equation*}
+
+Those sinusoidal waves with constant angular frequency can be expressed as complex quantities $ \hat{I}_a,\; \hat{I}_b e^{\J 2\pi/3},\; \hat{I}_c e^{-\J 2\pi/3}$, with fixed angle of $120^\circ$ relative to each other, as depicted in \ref{fig:0_sv}.
+
+\begin{figure}[H]
+	\centering
+	\include{tikz/SV_abc.tex}
+	\caption{Three phase system definition with complex quantities}
+	\label{fig:0_sv}
+\end{figure}
+However, the use of a complex space vector does not require the three-phase quantities to be sinusoidal or to have a constant frequency. In the general case, the instantaneous phase quantities can be represented by the complex space vector
+\[
+\underline{i}_{abc} = \frac{2}{3} \left( {I}_a, + {I}_b e^{\J 2\pi/3} + {I}_c e^{-\J 2\pi/3}  \right)
+\]
+The arbitrary factor $2/3$ is due to the  normalization convention, ensuring amplitude correctness.
+Defining $i_\alpha = \RE\{\underline{i}_{abc}\}$ and $i_\beta = \IM\{\underline{i}_{abc}\}$, the commonly known Clarke transform for balanced systems, as in three phase system without connection of the neutral star point, can be derived. \\
+Even though this transformation seems like a projection, no information is lost when the zero sequence condition $i_a + i_b + i_c = 0$ is considered.
+
+\begin{equation*}
+	\begin{bmatrix}
+		i_\alpha \\
+		i_\beta
+	\end{bmatrix}
+	=
+	\underbrace{
+	\frac{2}{3}
+	\begin{bmatrix}
+		1 & -\frac{1}{2} & -\frac{1}{2} \\
+		0 & \frac{\sqrt{3}}{2} & -\frac{\sqrt{3}}{2}
+	\end{bmatrix}}_{\clarke}
+	\begin{bmatrix}
+		i_a \\
+		i_b \\
+		i_c
+	\end{bmatrix}.
+\end{equation*}
+% TODO nochmal lesen
+Eben though $\clarke$ is not a square matrix, the inverse transform can be defined via the Moore-Penrose pseudo inverse $\iclarke  = \clarke^{\dagger}$
+
+
+
+
+
 \section{Interior Magnet PMSM \label{sec:model_pmsm}}
-This leads to the to the continuous time state space model of Equation \eqref{equ:1_apv_ss}.
+\reminder{...} This leads to the to the continuous time state space model of Equation \eqref{equ:1_apv_ss}.
 \begin{equation}
 	\dfrac{\diff}{\diff t} \begin{bmatrix}
 		i_{Sd} \\i_{Sq}
@@ -20,6 +75,26 @@ This leads to the to the continuous time state space model of Equation \eqref{eq
 	\label{equ:1_apv_ss}
 \end{equation}
 
+To analyze the Model \eqref{equ:1_apv_ss} in the context of linear parameter-varying systems, the permanent magnet flux linkage $\psi_{PM}$ is sometimes treated as a state or input \cite{plsAddRef}. This results in the following description, which matches the generic LPV system form as defined in \cite{lpvBriat} $\Dot{\x} = \bm{A}(\omega) \x  + \bm{B} (\omega)$.
+\begin{equation}
+	\dfrac{d}{dt} \begin{bmatrix}
+		i_{Sd} \\i_{Sq}
+	\end{bmatrix}
+	= \begin{bmatrix}
+		-\frac{R_S}{L_d} & \frac{L_q}{L_d} \omega_e(t)\\ -\frac{L_d}{L_q} \omega_e(t) & -\frac{R_S}{L_q}
+	\end{bmatrix}\begin{bmatrix}
+		i_{Sd} \\i_{Sq}
+	\end{bmatrix} + 
+	\begin{bmatrix}
+		\frac{1}{L_d} & 0 & 0 \\ 0 & \frac{1}{L_q} & -\frac{\omega_e(t)}{L_q}
+	\end{bmatrix}\begin{bmatrix}
+		v_{Sd} \\v_{Sq} \\ \psi_{PM}
+	\end{bmatrix}
+	\label{equ:apv_ss_psi}
+\end{equation}
+
+Analyzing this model, one has to quantify the influence of the parameter $\omega$. Due to the balance of angular momentum of the motor shaft \eqref{equ:1_coupling}, the electrical rotor speed $\omega = \omega_e = \omega_{m1}p$ is Lipschitz-continuous. With the eigenvalues of the respective dynamical system \eqref{equ:1_coupling} being slower than \eqref{equ:2_apv_ss}, as discussed in Section \ref{sec:model_coupling}.
+
 
 \section{Coupling Dynamics \label{sec:model_coupling}}
 \begin{equation}
@@ -31,3 +106,5 @@ This leads to the to the continuous time state space model of Equation \eqref{eq
 	\end{split}
 	\label{equ:1_coupling}
 \end{equation}
+
+
