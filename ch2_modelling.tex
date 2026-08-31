@@ -1,6 +1,6 @@
 \chapter{Modelling} \label{sec:modelling}
 \section{Space Vector Theory} \label{sec:0_sv} % TODO: move to intro
-Due to benefits regarding the mathematical modeling of electrical three-phase system, space vector are commonly used. The idea behind it, is to describe real-valued three-phase quantities as one complex-valued quantity. By doing so, a change of reference frames is easily achieved es and  an intuitive description of the magnitude and phase angle of a three-phase system is provided. \\
+Due to benefits regarding the mathematical modeling of electrical three-phase system, space vector are commonly used. The idea behind it, is to describe real-valued three-phase quantities as one complex-valued quantity. By doing so, a change of reference frames is easily achieved (as shown in Section \ref{sec:0_refframes})  and  an intuitive description of the magnitude and phase angle of a three-phase system is provided. \\
 
 For a balanced sinusoidal three-phase current system, the phase currents can be expressed as 
 
@@ -23,7 +23,7 @@ Those sinusoidal waves with constant angular frequency can be expressed as compl
 \end{figure}
 However, the use of a complex space vector does not require the three-phase quantities to be sinusoidal or to have a constant frequency. In the general case, the instantaneous phase quantities can be represented by the complex space vector
 \[
-\underline{i}_{abc} = \frac{2}{3} \left( {I}_a, + {I}_b e^{\J 2\pi/3} + {I}_c e^{-\J 2\pi/3}  \right)
+\underline{i}_{abc} = \frac{2}{3} \left( {I}_a + {I}_b e^{\J 2\pi/3} + {I}_c e^{-\J 2\pi/3}  \right)
 \]
 The arbitrary factor $2/3$ is due to the  normalization convention, ensuring amplitude correctness.
 Defining $i_\alpha = \RE\{\underline{i}_{abc}\}$ and $i_\beta = \IM\{\underline{i}_{abc}\}$, the commonly known Clarke transform for balanced systems, as in three phase system without connection of the neutral star point, can be derived. \\
@@ -48,8 +48,10 @@ Even though this transformation seems like a projection, no information is lost 
 	\end{bmatrix}.
 \end{equation*}
 % TODO nochmal lesen
-Eben though $\clarke$ is not a square matrix, the inverse transform can be defined via the Moore-Penrose pseudo inverse $\iclarke  = \clarke^{\dagger}$
+Eben though $\clarke$ is not a square matrix, the inverse transform can be defined via the Moore-Penrose pseudo-inverse $\iclarke  = \clarke^{\dagger}$.\\
+The Clarke transform can be thought of as a convenient mathematical description for the three phase quantities by using a space vector. As mentioned, this eases the transformation between coordinate systems. This will be shown in the following section.
 
+\section{Reference Frames} \label{sec:0_refframes}
 
 
 

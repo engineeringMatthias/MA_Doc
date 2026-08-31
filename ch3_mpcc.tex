@@ -1486,16 +1486,15 @@ J_{is} = \| \bm{\Bar{y}}  - \bm{\Bar{r}} \|_{\bm Q}^2  + \wLNorm{\Bar{\boldsymbo
 
 Defining the auxiliary terms
 \begin{align*}
-	\bm{\gamma}_I 	&= 2 \bm{\rho}_I^\T \bm{W}_I \bm{P}_I	\\
-	\bm{Q}_I 		&= \bm{P}_I^\T \bm{W}_I \bm{P}_I 		\\
-	\Tilde{\bm \gamma}^\T &= \bm{\gamma}^T + \bm{\gamma}_I^T \\
-	\Tilde{\bm \Gamma}  &= \predDeltaU^T (\bm{Q}  + \bm{Q_I}) \predDeltaU + \bm{R}
-\end{align*} 
+	\bm{Q}_I 	  &= \bm{P}_I^\T \bm{W}_I \bm{P}_I 		\\
+	\bm{\gamma}_I^\T &= \bm{\gamma}^\T + 2 \bm{\rho}_I^\T \bm{W}_I \bm{P}_I\\
+	\bm{\Gamma}_I  &= \predDeltaU^\T (\bm{Q}  + \bm{Q}_I) \predDeltaU + \bm{R}
+ \end{align*} 
 eases the augmentation such that the quadratic program with integral states can be expressed as
 
 \begin{equation}
 	\begin{split}
-		&\arg \min_{\Bar{\bm{\Delta  u}_S}}\;  \frac{1}{2} \| {\Deltaub} \|_{\tilde{\bm{\Gamma}}}^2 + \Tilde{\bm{\gamma}}^\T \Deltaub \\
+		&\arg \min_{\Bar{\bm{\Delta  u}_S}}\;  \frac{1}{2} \| {\Deltaub} \|_{{\bm{\Gamma}}_I}^2 + \Tilde{\bm{\gamma}_I}^\T \Deltaub \\
 		\text{s.t.} & \quad 
 		{\bm{M}} \Deltaub\le {\bm{\mu}}
 		\label{equ:2_QP_is}
@@ -1517,32 +1516,51 @@ Using this approach, integral action of the MPC can be ensured, without increasi
 \[
 J_{is} = \| \bm{\Bar{y}}  - \bm{\Bar{r}} \|_{\bm Q}^2  + \wLNorm{\Bar{\boldsymbol{\Delta u}}}{R} + \| \bm{z} \|_{\bm{W}_I}^2
 \]
-
 one can see that the quadratic form regarding $z$ will also grow in value.The solver of the quadratic program will still search for the vector $\Deltaub$ which minimizes that cost. Even though the effect of the weighting $\bm{Q,R}$ will still be considered, by that, numerical issues may arise due to that wind up effect. 
 
+\subsection{Backup Stage}
+If 
+
+In classical PI-FOC with SVPWM, 
+
+Two common methods are Minimum Phase Error  and Minimum Amplitude Error over-modulation strategies.
+For implementation details, refer to \cite{NeunerMA} 
+
 \subsection{Soft Constraints} \label{sec:mpcc_ext_sc}
-\reminder{Dokumentation in Arbeit}
+By adding a slackness variable $\eta_i$ to the left hand side of a linear inequality according to Equation \ref{equ:2_sc}
+\begin{equation}
+	m_i \zeta_i \le \mu_i + \eta_i
+	\label{equ:2_sc}
+\end{equation}
+where $m_i, \mu_i$ are scalar constants, the optimization variable $\zeta_i$ can violate this constraint. For every step in time, the constraint slackness $m_i \zeta_i[k] - \mu_i = \eta_i[k]$ is then minimized by an extra term in the cost function with a weighting factor $w_\eta$. This results in a mechanism, which allows for short-term constraint violations, due to the modification of Equation \eqref{equ:2_sc}, but the weighted term $\| \eta \|_{w_i}^2$, minimizes $\eta$.\\
+The vector  of optimization variables is extended by the slackness variable  $\boldsymbol{\Bar{\Delta u}} \rightarrow \bm{\zeta} = \begin{bmatrix}
+	\bm{\Bar{\Delta u}}^\T & \eta
+\end{bmatrix}^\T$. To reduce the number of elements in $\bm{\zeta}$, it was decided to use one scalar slackness variable, which is scaled by the constant vector $ \bm{\rho} \; : \; \rho_i \in \mathbb{R},\; 0 \le \rho_i \le 1$. The linear inequalities of the Quadratic Program \eqref{equ:2_QP} are extended to 
+\[
+\bm{M} \bm{\zeta} \le \bm{\mu} + \bm{ \rho} \eta
+\].
 %Using the compact L2-Norm Notation:
 %\[
 %\boldsymbol{\Bar{\Delta u}^\T}[k] \boldsymbol{Q} \boldsymbol{\Bar{\Delta u}}[k] = 
 %\| \Bar{\boldsymbol{\Delta u}}\|_{\boldsymbol{Q}}^2
 %\]
-Considering the slackness variable, integral error states, the total cost function can be written down:
-\[
-\Tilde{J} = \wLNorm{\Bar{y} - \Bar{r}}{Q}  + \wLNorm{\Bar{\Delta u}}{R} + \wLNorm{\Bar{z}}{W_I} + w_{\eta} \eta
-\]
-The vector  of optimization variables is extended by the slackness variable  $\boldsymbol{\Bar{\Delta u}} \rightarrow \bm{\zeta} = \begin{bmatrix}
-	\bm{\Bar{\Delta u}}^\T & \eta
-\end{bmatrix}^T$
+Considering the slackness variable and integral error states, the total cost function is then defined by
+\begin{equation*}
+	\Tilde{J}_\mathrm{tot} = \wLNorm{\Bar{y} - \Bar{r}}{Q}  + \wLNorm{\Bar{\Delta u}}{R} + \wLNorm{\Bar{z}}{W_I} + w_{\eta} \eta
+\end{equation*}.
 
+With that, the total modified Quadratic Program \eqref{equ:2_QP_sc} can be written down.
 
 \begin{equation}
 	\begin{split}
-		\boldsymbol{\Bar{\Delta u}}^* = \footnotesize{\begin{bmatrix} 
+		\boldsymbol{\Bar{\Delta u}}^* [k] = 
+		\underbrace{
+		\footnotesize{\begin{bmatrix} 
 				1 & 0 & & 0\\
 				0& \ddots & &  \vdots\\
 				& 0& 1 & 0
-		\end{bmatrix}} &\arg \min_{\boldsymbol{\zeta}}
+		\end{bmatrix}}}_{\left[\bm{I}^{mD_S \times mD_S}\;\vdots\;\bm{0}^{ mDs \times 1} \right]} 
+		&\arg \min_{\boldsymbol{\zeta}}
 		\bm{\zeta}^T \begin{bmatrix}
 			\Tilde{\bm{\Gamma}} & \bm{0} \\
 			\bm{0}^T & w_{\eta}
@@ -1556,16 +1574,75 @@ The vector  of optimization variables is extended by the slackness variable  $\b
 			\bm{0}^T & 0
 		\end{bmatrix} 
 		\underbrace{\begin{bmatrix}
-				\Bar{\bm{\Delta u}}\\ \eta
+				\Bar{\bm{\Delta u}}\\ \eta^2
 		\end{bmatrix}}_{\bm{\zeta}}
 		\leq \begin{bmatrix}
 			{\bm{\mu}} \\ /
 		\end{bmatrix}
 	\end{split}
-	\label{equ:extended_OP}
+	\label{equ:2_QP_sc}
 \end{equation}
+The matrix $\left[\bm{I}^{mD_S \times mD_S}\;\vdots\;\bm{0}^{mD_S\times 1} \right]$ is used in order for $\Deltaub$ to be the optimization target (without $\eta$). In the implementation $[\bm{I}_2\; \bm{0}_2 \; \hdots\; \bm{0}_2 \; 0 ]$ instead of $\left[\bm{I}\;\vdots\;\bm{0} \right]$, such that only the first voltage vector $\bm{\Delta u}[k]$ is applied.
+
+\subsubsection{Simulation}
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\textwidth]{Figs/2_sim_wramp_reference_sc.eps}
+	\caption{Simulated speed ramp: reference quantities}
+	\label{fig:2_sim_ref}
+\end{figure}
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\textwidth]{Figs/2_sim_wramp_control_sc.eps}
+	\caption{Simulated speed ramp: control quantities}
+	\label{fig:2_sim_control}
+\end{figure}
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\textwidth]{Figs/2_sim_wramp_constraints_sc.eps}
+	\caption{Simulated speed ramp: voltage and current constraints}
+	\label{fig:2_sim_constr}
+\end{figure}
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\textwidth]{Figs/2_sim_wramp_constraints_sc_detail.eps}
+	\caption{Simulated speed ramp: voltage and current constraints, detail during deceleration phase}
+	\label{fig:2_sim_constr_detail}
+\end{figure}
+As it can be seen the output of the MPC, would violate the voltage constraints by up to 5V during the deceleration phase. The first outlier happens $\qty{7}{\micro s}$ and the last $\qty{11}{\micro s}$ after the reference change. \\
+This issue does not improve if the MPC is provided with an actual reference trajectory, instead of copying the value for the current reference over $D_s$. Since the rotor speed deceleration is at maximum during that interval, it can be assumed that the prediction error due to $\hat{\omega}[k+1] = \omega[k]$ is to blame for that.   
+
+Detailed phases:
+
+\begin{figure}[H]
+	\centering
+		\begin{subfigure}[b]{0.4\textwidth}
+		\includegraphics[width=\textwidth]{Figs/2_sim_wramp_control_phase1_nosc.eps}
+		\caption{Without soft constraints}
+	\end{subfigure}
+	\hspace{0.05\textwidth}
+	\begin{subfigure}[b]{0.4\textwidth}
+		\includegraphics[width=\textwidth]{Figs/2_sim_wramp_control_phase1_sc.eps}
+		\caption{With soft constraints}
+	\end{subfigure}
+	\caption{Simulated speed ramp: Phase 1 - Acceleration}
+	\label{fig:2_sim_phase1}
+\end{figure}
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\textwidth]{Figs/2_sim_wramp_control_phase2_sc.eps}
+	\caption{Simulated speed ramp: Phase 2 - Over-modulation due to active voltage constraints}
+	\label{fig:2_sim_phase2}
+\end{figure}
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\textwidth]{Figs/2_sim_wramp_control_phase3_sc.eps}
+	\caption{Simulated speed ramp: Phase 3 - Deceleration}
+	\label{fig:2_sim_phase3}
+\end{figure}
 
 \section{Experimental Evaluation}
+
 
 
 
@@ -1615,6 +1692,28 @@ The control algorithms are implemented in MATLAB\textsuperscript{\textregistered
 \subsection{Timing Uncertainties}
 \subsection{Constrained Operation}
 \subsection{Computational Effort}
+
+
+\subsection{Extension: time optimal pre-rotation}
+In \cite{rrccWang}
+
+\begin{comment}
+	\begin{figure}[H]
+		\centering
+		\includegraphics[width=0.8\linewidth]]{Figs/2_to_principle_in_use.png}
+		\caption{No RPR\\Image Source: \cite{rrccWang}
+			\label{fig:2_rpr_no}
+		\end{figure}
+		
+		\begin{figure}[H]
+			\centering
+			\includegraphics[width=0.8\linewidth]]{Figs/2_to_principle_in_use.png}
+			\caption{$\psi_S^S$ varying in tracking and maintaining process
+				caused by time optimal pre-rotation.\\ Image Source: \cite{rrccWang}}
+			\label{fig:2_yes_rpr_yes}
+		\end{figure}
+\end{comment}
+
 
 \chapter{Observer based Current Prediction}\label{ch:ipred}
 
