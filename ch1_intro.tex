@@ -1,234 +1,267 @@
 \chapter{Introduction}\label{ch:introduction}
+\section{Space Vector Theory} \label{sec:0_sv} 
+Due to benefits regarding the mathematical modeling of electrical three-phase system, space vectors are commonly used. The idea behind it, is to describe real-valued three-phase quantities as one complex-valued quantity. By doing so, a change of reference frames is easily achieved (as shown in Section \ref{sec:0_refframes})  and  an intuitive description of the magnitude and phase angle of a three-phase system is provided. \\
 
-\section{Inserting Figures, Subplots, etc.}
-\label{sec:insert-figures}
-To insert a figure in \gls{latex}, we need to include the \texttt{graphicx} package. This package is already included in our \texttt{packages.tex} file. In the following sections, you will learn how to insert figures in different ways.
+For a balanced sinusoidal three-phase current system, the phase currents can be expressed as 
 
-\subsection{Inserting a Single Figure}
-\label{subsec:insert-single-fig}
-You can use the \texttt{figure} environment with the \texttt{\textbackslash includegraphics} command to insert a single figure. Here's an example:
+\begin{equation*}
+	\begin{split}
+		i_a(t) &= I\cos\omega t,\\
+		i_b(t) &= I\cos\left(\omega t-\frac{2\pi}{3}\right),\\
+		i_c(t) &= I\cos\left(\omega t+\frac{2\pi}{3}\right)
+	\end{split}
+	\label{equ:0_current_sequence}
+\end{equation*}
 
-\begin{verbatim}
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=0.5\textwidth]{path/to/your/image.png}
-    \caption{Example figure}
-    \label{fig:single}
-\end{figure}
-\end{verbatim}
+Those sinusoidal waves with constant angular frequency can be expressed as complex quantities $ \hat{I},\; \hat{I} e^{\J 2\pi/3},\; \hat{I} e^{-\J 2\pi/3}$, with fixed angle of $120^\circ$ relative to each other, as depicted in Figure \ref{fig:0_sv}.
 
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=0.4\textwidth]{Figs/Logo_Farbe_weiß_Text.png}
-    \caption{Example figure}
-    \label{fig:single}
+\begin{figure}
+	\centering
+	\include{tikz/SV_abc.tex}
+	\caption{Three phase system definition with complex quantities}
+	\label{fig:0_sv}
 \end{figure}
 
-\textbf{Explanation} of the individual commands:
-\begin{itemize}
-    \item \texttt{\textbackslash beginfigure}: Creates figure enviorment.
-    \item \texttt{[htbp]}: Placement specifier (here, top, bottom, page).
-    \item \texttt{\textbackslash centering}: Centers the figure.
-    \item \texttt{\textbackslash includegraphics[width=0.5\textbackslash textwidth]\{path/to/your/image.png\}}: Adds the image which ist stored at \textit{path/to/your/image.png} and adjusts the width of the image to 50\% of the text width.
-    \item \texttt{\textbackslash caption\{\}}: Adds a caption below the figure.
-    \item \texttt{\textbackslash label\{\}}: Adds a label for referencing the figure.
-\end{itemize}
+The instantaneous phase quantities can be represented by the complex space vector
+\[
+\underline{i}_{S} = \frac{2}{3} \left( {I} + {I} e^{\J 2\pi/3} + {I} e^{-\J 2\pi/3}  \right).
+\]
+The scaling factor $2/3$ is chosen according to the normalization convention such that the magnitude of the space vector corresponds to the amplitude of the balanced three-phase quantity. In general, the use of a complex space vector does not require the three-phase quantities to be sinusoidal or to have a constant frequency
+Defining $i_\alpha = \RE\{\underline{i}_{abc}\}$ and $i_\beta = \IM\{\underline{i}_{abc}\}$, the commonly known Clarke transform for balanced systems, as in three phase system without connection of the neutral star point, can be derived. \\
+Even though this transformation seems like a projection, no information is lost when the zero sequence condition $i_a + i_b + i_c = 0$ is considered.
 
-This \gls{latex}-code will insert a single figure with the caption `Example figure' and a label for cross-referencing. You can reference a figure using the \texttt{\textbackslash ref\{fig:label\}} command, where you insert the actual label you gave the figure you want to reference.
-In Fig.~\ref{fig:single}, you can see how the code from above will look when applied in \gls{latex}.
+\begin{equation}
+	\begin{bmatrix}
+		i_\alpha \\
+		i_\beta
+	\end{bmatrix}
+	=
+	\underbrace{
+		\frac{2}{3}
+		\begin{bmatrix}
+			1 & -\frac{1}{2} & -\frac{1}{2} \\
+			0 & \frac{\sqrt{3}}{2} & -\frac{\sqrt{3}}{2}
+	\end{bmatrix}}_{\clarke}
+	\begin{bmatrix}
+		i_a \\
+		i_b \\
+		i_c
+	\end{bmatrix}.
+	\label{equ:0_clarke}
+\end{equation}
+Even though $\clarke$ is not a square matrix, the inverse transform can be defined via the Moore-Penrose pseudo-inverse $\iclarke  = \clarke^{\dagger}$.\\
+The Clarke transform can be thought of as a convenient mathematical description for the three phase quantities by using a space vector. As mentioned, this eases the transformation between coordinate systems. This will be shown in the following section.
+
+\section{Reference Frames} \label{sec:0_refframes}
+Two reference frame for the stator and voltage current space vector will be of interest. The first one is the stationary reference frame (SRF). In this frame of reference the space vector is a direct representation of the quantities, which can be directly measured at the terminals of the machine. Therefore the constraints, due to the generation of the stator voltage is stationary in this frame of reference. Due to the orientation of the magnetic main flux linkage relative to  the rotor, it is beneficial to also describe these quantities in a reference frame fixed to the rotor. This frame will be called the rotating reference frame (RRF). By doing so, the real or direct component of this vector $\RE\{\underline{i}_S^R\} = i_d$ is oriented in the same axis as the flux linkage of the permanent magnets $\underline{\psi}_{PM}$ and the imaginary or quadrature component $\IM\{\underline{i}_S^R\} = i_q$ will be rotated by $90^\circ$.Consequently, the D axis current $i_d$ primarily influences the flux-producing component of the stator current, whereas the Q axis current $i_q$ can be interpreted as the torque-producing component of the stator current.
 
 
-\subsection{Inserting Two Figures Side by Side}
-\label{subsec:insert-side-by-side}
-You can use the \texttt{subfigure} package to insert two figures side by side. Here's an example:
+\subsection{Coordinate Frame Transformation} \label{sec:0_coordtrans}
+As mentioned in the previous section, a transformation rule is needed, to translate quantities from the SRF to the RRF and vice versa.
 
-\begin{verbatim}
-\begin{figure}[htbp]
-    \centering
-    \begin{subfigure}[b]{0.4\textwidth}
-        \includegraphics[width=\textwidth]{path/to/your/image-a.png}
-        \caption{Figure A}
-        \label{fig:subfiga}
-    \end{subfigure}
-    \hspace{0.05\textwidth}
-    \begin{subfigure}[b]{0.4\textwidth}
-        \includegraphics[width=\textwidth]{path/to/your/image-b.png}
-        \caption{Figure B}
-        \label{fig:subfigb}
-    \end{subfigure}
-    \caption{Two figures side by side}
-    \label{fig:sidebyside}
-\end{figure}
-\end{verbatim}
+To describe this transformation an arbitrary space vector $\underline{z}$ is considered. In the stationary reference frame, the vector can be expressed as
 
-\begin{figure}[htbp]
-    \centering
-    \begin{subfigure}[b]{0.4\textwidth}
-        \includegraphics[width=\textwidth]{Figs/Logo_Farbe_weiß_Text.png}
-        \caption{Figure A}
-        \label{fig:subfiga}
-    \end{subfigure}
-    \hspace{0.05\textwidth}
-    \begin{subfigure}[b]{0.4\textwidth}
-        \includegraphics[width=\textwidth]{Figs/Logo_s_weiß_Text.png}
-        \caption{Figure B}
-        \label{fig:subfigb}
-    \end{subfigure}
-    \caption{Two figures side by side}
-    \label{fig:sidebyside}
-\end{figure}
+\begin{equation*}
+	\underline{z}^{S}
+	=
+	z_\alpha + \J z_\beta
+	=
+	\lvert z\rvert e^{\J\epsilon},
+	%	\label{equ:0_sv_srf}
+\end{equation*}
 
-\textbf{Explanation:}
-\begin{itemize}
-    \item \textbf{\texttt{\textbackslash begin\{subfigure\}[b]\{0.4\textbackslash textwidth\}}}: Creates a subfigure occupying $40$\% of the text width.
-    \item \textbf{\texttt{\textbackslash hspace\{0.05\textbackslash textwidth\}}}: Adds horizontal space of 5\% of the textwidth between the subfigures.
-\end{itemize}
-This code will insert two figures side by side with captions `Figure A' and `Figure B' and a common caption `Two figures side by side'.
+where $\epsilon$ denotes the angle of the space vector relative to the $\alpha$-axis. Therefore, its components are given by
 
-\subsection{Inserting Two Figures Stacked Vertically}
-\label{subsec:insert-stacked}
-To insert two figures stacked vertically, you can use the \texttt{subfigure} package similarly to the previous example. Here's an example:
+\begin{equation*}
+	z_\alpha = \RE\{\underline{z}^{S}\}
+	= \lvert z\rvert\cos\epsilon,\quad
+	z_\beta = \IM\{\underline{z}^{S}\}
+	= \lvert z\rvert\sin\epsilon.
+	%	\label{equ:0_sv_srf_components}
+\end{equation*}
 
-\begin{verbatim}
-\begin{figure}[htbp]
-    \centering
-    \begin{subfigure}[b]{0.5\textwidth}
-        \includegraphics[width=0.8\textwidth]{path/to/your/image-a.png}
-        \caption{Subfigure A}
-        \label{fig:subfigva}
-    \end{subfigure}
-    \vspace{0.5cm}
-    \begin{subfigure}[b]{0.5\textwidth}
-        \includegraphics[width=0.8\textwidth]{path/to/your/image-b.png}
-        \caption{Subfigure B}
-        \label{fig:subfigvb}
-    \end{subfigure}
-    \caption{Two figures stacked vertically}
-    \label{fig:stacked}
-\end{figure}
-\end{verbatim}
+The same space vector can be expressed in the rotating reference frame as
 
-\begin{figure}[htbp]
-    \centering
-    \begin{subfigure}[b]{0.5\textwidth}
-        \includegraphics[width=0.8\textwidth]{Figs/Logo_Farbe_weiß_Text.png}
-        \caption{Subfigure A}
-        \label{fig:subfigva}
-    \end{subfigure}
-    \vspace{0.5cm} % Adjust vertical space between figures
-    \begin{subfigure}[b]{0.5\textwidth}
-        \includegraphics[width=0.8\textwidth]{Figs/Logo_s_weiß_Text.png}
-        \caption{Subfigure B}
-        \label{fig:subfigvb}
-    \end{subfigure}
-    \caption{Two figures stacked vertically}
-    \label{fig:stacked}
+\begin{equation*}
+	\underline{z}^{R}
+	=
+	z_d + \J z_q
+	=
+	\lvert z\rvert e^{\J\kappa},
+	\label{equ:0_sv_rrf}
+\end{equation*}
+
+\begin{figure}
+	\centering
+	\include{tikz/Coord_frame_Transition.tex}
+	\caption{Arbitrary space vector $\underline{z}$ in SRF and RRF}
+	\label{fig:0_refframes}
 \end{figure}
 
-\textbf{Explanation:}
-\begin{itemize}
-    \item \textbf{\texttt{\textbackslash vspace\{0.5cm\}}}: Adds vertical space (of $0.5\mathrm{cm}$) between the subfigures.
-\end{itemize}
+where $\kappa$ denotes the angle of the space vector relative to the D axis. The corresponding components are then give as
 
-This will insert two figures stacked vertically with captions `Figure A' and `Figure B' and a common caption `Two figures stacked vertically'. You can reference each subfigure by itself by using its labels or you can reference both figures at once by using their common label.
-In Fig. \ref{fig:subfigva}, you can see the \textsc{EALS} logo in color, while Fig. \ref{fig:subfigvb} shows the \textsc{EALS} logo in black. Both figures are included in Fig. \ref{fig:stacked}.
+\begin{equation*}
+	z_d = \RE\{ \underline{z}^{R} \}
+	= \lvert z\rvert\cos\kappa,\quad
+	z_q = \IM\{ \underline{z}^{R} \}
+	= \lvert z\rvert\sin\kappa.
+	%	\label{equ:0_sv_rrf_components}
+\end{equation*}
 
-\subsection{Including List of Figures}
-\label{subsec:insert-listoffigs}
-To create a list of figures use the\textbf{ \textbackslash listoffigures} command. The caption of each labeled figure will be used to generate this list.
-\newpage
-\subsection{Macros}
-To make the writing of equations faster and easier, this template provides several macros which are shortened versions of frequently used mathematical LaTeX functions.
-The definition of these macros can be found in the \texttt{macros.tex} file.
-Feel free to add your own macros for e.g. defining variables that are used multiple times throughout the document.
-\subsubsection{\textbackslash mrm\{\}}
-To avoid text in a mathematical env to become \textit{cursive}, use the macro-command \texttt{\textbackslash mrm\{\}} which we provide in this template (see \texttt{macros.tex}).\\
-Without \texttt{\textbackslash mrm\{\}}:\\
-\noindent\hspace*{15mm}$V_{pp} = 6 V$\\
-With \texttt{\textbackslash mrm\{\}}:\\
-\noindent\hspace*{15mm}$V_\mrm{pp} = 6\mrm{V}$\\
-This should be remembered because only variables should be written in cursive. In this case, neither the subscript "pp" or the unit V is a variable, so it shouldn't be cursive. This macro is a short version of the LaTeX function \texttt{\textbackslash mathremove\{\}}.
-\subsubsection{\textbackslash diff}
-When writing a derivation we differentiate between a full derivation and a partial derivation. 
-The full derivation is denoted with the letter d. This can be written in a math environment by using the macro \texttt{\textbackslash diff}.\\
-For example:
-\begin{align*}    
-\frac{\diff Q}{\diff t} = \frac{\diff s}{\diff t}
-\end{align*}
-The partial derivation is denoted with the symbol $\partial$.  by using the LaTeX function \texttt{\textbackslash partial}.\\
-For example:
-\begin{align*}    
-\frac{\partial Q}{\partial t} = \frac{\partial s}{\partial t}
-\end{align*}
-\subsubsection{\textbackslash RE, \textbackslash IM}
-To denote the real-valued part of a complex-valued variable, the symbol $\RE$ is used. This can be written in a math environment by using the macro \texttt{\textbackslash RE}.
-To denote the imaginary-valued part of a complex-valued variable, the symbol $\IM$ is used. This can be written in a math environment by using the macro \texttt{\textbackslash IM}.\\
-Example:
-\begin{align*}
-    |z| = \sqrt{\RE(z)^2 + \IM(z)^2}
-\end{align*}
-\subsubsection{\textbackslash J}
-The imaginary unit is either denoted by the symbol $\J$ or $\mrm{i}$. In electrical engineering, $\J$ is more common. Because $\J$ is not a variable, it is not written in cursive. The macro \texttt{\dateseparator J} enables us to use $\J$ in a mathematical environment.\\
-Example:
-\begin{align*}
-    z = a + \J b
-\end{align*}
-\subsubsection{\textbackslash T}
-A transposed vector is denoted with the letter T in superscript. To write this in a mathematical environment the macro \texttt{\textbackslash T} can be used.\\
-Example:
-\begin{align*}
-    (A + B)^{\T} = A^{\T} + B^{\T}
-\end{align*}
-\subsubsection{\textbackslash COS,\textbackslash SIN}
-To add cos and sin with large brackets in a mathematical environment, we can use the \texttt{\textbackslash COS\{\}} or \texttt{\textbackslash SIN\{\}} macro.
-\begin{align*}
-    \COS{\dfrac{\omega}{\omega_{0}}}
-\end{align*}
 
-\section{Glossary}
-A glossary is a section at the end of a written work that defines confusing, technical, or advanced words. It is not mandatory to include a glossary in your thesis, but if you want to include one, here is how.\\
-First, you create a new \texttt{tex}-file in which you write your glossary entries. 
-In \gls{latex} you can define a glossary entry the following way:
-\begin{verbatim}
-\newglossaryentry{latex}{
-    name=LaTeX,
-    description={A document preparation system for high-quality typesetting}
-}
-\end{verbatim}
-\textbf{Explanation:}
-\begin{itemize}
-    \item \textbf{label}: The first parameter is the label of this term and is used to reference it within the document with the gls command. In the example from above the label is `latex'. 
-    \item \textbf{name}: The name parameter includes the word to be defined, in this case, `LaTeX'.
-    \item \textbf{description}: Includes the definition of the current term.
-\end{itemize} 
-You can also define acronyms you use in your thesis. To do this, you open the \texttt{tex}-file containing your glossary entries and then define your acronym the following way:
-\begin{verbatim}
-    \newacronym{rms}{RMS}{Root Mean Squared}
-\end{verbatim}
-The structure is the same as of the \texttt{\textbackslash newglossaryentry}. Here, the \textbf{label} is \texttt{rms}, the \textbf{name} is \texttt{RMS} and the \textbf{description} is \texttt{Root Mean Squared}.\\
-\newline
-To include the \texttt{glossary.tex} file in your thesis, you use the command \texttt{\textbackslash input\{glossary\_filename\}}. Here, you have to replace the \texttt{glossary\_filename} parameter with the actual filename of the \texttt{tex}-file containing your glossary. This is already defined in the  \texttt{main.tex} file in line 56.\\
-\newline
-To print your glossary you have to use the command \texttt{\textbackslash printglossary} at the position in your thesis at which you want the glossary to be. We inserted it at the beginning of the thesis (before the table of contents).\\
-If you have acronyms that you want to include, you use an additional keyword with the previous command:  \texttt{\textbackslash printglossary[type=\textbackslash acronymtype]}.\\
-\subsection{Use Glossary entries in the text}
-After you have defined the terms, to use them while you are typing your \gls{latex} file use one of the commands described below:
-\begin{itemize}
-    \item \textbf{\texttt{\textbackslash gls\{ \}}}: This prints the term in lowercase.\\ Example: \texttt{\textbackslash gls\{maths\}} prints `mathematics' when used.
-    
-    \item \textbf{\texttt{\textbackslash Gls\{ \}}}: This prints the term lowercase with the first letter printed in uppercase.\\
-    Example: \texttt{\textbackslash Gls\{maths\}} prints `Mathematics'.
-    
-    \item \textbf{\texttt{\textbackslash glspl\{ \}}}: This prints the term in lowercase and puts it in its plural form.\\ Example: \texttt{\textbackslash glspl\{formula\}} prints `formulas'.
-    
-    \item \textbf{\texttt{\textbackslash Glspl\{ \}}}: This prints the term with the first letter in uppercase and puts it in its plural form.\\ Example: \texttt{\textbackslash Glspl\{formula\}} prints `Formulas'.
-\end{itemize}
-Including your terms in your text, using the commands from above may look something like this:\\
-In this thesis, we will use \gls{latex} to prepare a high-quality document. The \Gls{latex} typesetting markup language is especially suitable 
-for documents that include \gls{maths}. \Glspl{formula} are rendered 
-easily once one gets used to the commands.
 
-\section{Model Predictive Control \label{sec:intro_mpc}}
+The angle between the $\alpha$-axis of the SRF and the $d$-axis of the RRF is defined by the electrical angle $\varphi_e =  \varphi$, as illustrated in Figure \ref{fig:0_refframes}. Due to that displacement, the space vector is transformed from the stationary to the rotating reference frame by a rotation of $-\varphi$. Hence,
+
+\begin{equation*}
+	\underline{z}^{R}
+	=
+	\underline{z}^{S}e^{-\J\varphi}
+	%	\label{equ:0_sv_transformation_complex}
+\end{equation*}
+holds.\\
+Substituting the Cartesian representation of the space vector gives
+
+\begin{equation}
+	z_d+\J z_q
+	=
+	(z_\alpha+\J z_\beta)
+	(\cos\varphi-\J\sin\varphi).
+	\label{equ:0_sv_transformation_expanded}
+\end{equation}
+
+Expanding the right-hand side and comparing the real and imaginary parts yields
+
+\begin{equation*}
+	\begin{split}
+		z_d &= z_\alpha\cos\varphi + z_\beta\sin\varphi,\\
+		z_q &= -z_\alpha\sin\varphi + z_\beta\cos\varphi.
+	\end{split}
+	%	\label{equ:0_sv_transformation_components}
+\end{equation*}
+
+The transformation can consequently be written in matrix form as
+
+\begin{equation}
+	\begin{bmatrix}
+		z_\alpha\\
+		z_\beta
+	\end{bmatrix}
+	=
+	\begin{bmatrix}
+		\cos\varphi & \sin\varphi\\
+		-\sin\varphi & \cos\varphi
+	\end{bmatrix}
+	\begin{bmatrix}
+		z_d\\
+		z_q
+	\end{bmatrix}.
+	\label{equ:0_dq_to_alpha_beta}
+\end{equation}
+
+Since this transformation rule can be applied for a any vector quantity, the stator current can be transformed between the two reference frames according to
+
+\begin{equation*}
+	\begin{bmatrix}
+		i_d\\
+		i_q
+	\end{bmatrix}
+	=
+	\underbrace{
+		\begin{bmatrix}
+			\cos\varphi & -\sin\varphi\\
+			\sin\varphi & \cos\varphi
+	\end{bmatrix}}_{\parkArg{\varphi}}
+	\begin{bmatrix}
+		i_\alpha\\
+		i_\beta
+	\end{bmatrix}.
+	\label{equ:0_current_alpha_beta_to_dq}
+\end{equation*}
+
+The inverse transformation is then given by
+
+\begin{equation*}
+	\begin{bmatrix}
+		i_\alpha\\
+		i_\beta
+	\end{bmatrix}
+	=
+	\underbrace{
+		\begin{bmatrix}
+			\cos\varphi & -\sin\varphi\\
+			\sin\varphi & \cos\varphi
+	\end{bmatrix}}_{\iparkArg{\varphi}}
+	\begin{bmatrix}
+		i_d\\
+		i_q
+	\end{bmatrix}.
+	%	\label{equ:0_current_dq_to_alpha_beta}
+\end{equation*}
+
+Since $\parkArg{\varphi}$ is a orthonormal matrix, $\iparkArg{\varphi} =\left(\parkArg{\varphi}\right)^{-1} = \left(\parkArg{\varphi}\right)^{\T}$ holds \cite{KaR2}.
+
+
+\section{2-Level Voltage Source Inverter}
+To generate the phase voltages for the control of the machine, while maintaining the high power required to operate it, a switched system is needed. This is commonly achieved using a two-level voltage source inverter (2L-VSI). The topology of such an 2L-VSI is depicted in Figure \ref{fig:0_inverter_structure}. It consists of one half bridge for each of the three phases, supplied by an DC voltage source (or rectified AC voltage).
+
+\begin{figure}[H]
+	\centering{	\includegraphics[width=0.7\textwidth]{Figs/2_inverter_structure.png}}
+	\caption{Two-level inverter driving a 3-phase motor. Image source: \cite{InverterStruct}}
+	\label{fig:0_inverter_structure}
+\end{figure}
+
+In theory, each of the six semiconductor switches can be controlled independently. However, during normal operation, these switches are operated in a complementary manner. Turning on both switches simultaneously would short-circuit the DC link and cause a shoot-through event. To prevent this, a short dead time is typically introduced when changing between switching states, during which both switches of a half-bridge are turned off. During this interval, the stator current can continue to flow through the freewheeling diodes.
+
+Since the PMSM considered here has no neutral connection, it will only react on the differential voltage signals with respect to the half bridge output nodes. Apart from the dead-time during interlocking, the state of the upper switch directly determines the state of the lower switch. With that, there $2^3=8$ possible states in which the switches can be controlled. By defining $\bm{s}_{upper}^\T = [s_{a,u}\; s_{b,u}\; s_{c,u}]$ as the vector of the state of the upper switches, the set of all switching states can be written down:
+\begin{equation*}
+	\mathcal{S}_{upper} = \left\{
+	\begin{bmatrix}
+		0 \\ 0\\ 0
+	\end{bmatrix}, 
+	\begin{bmatrix}
+		0 \\ 0\\ 1
+	\end{bmatrix},
+	\begin{bmatrix}
+		0 \\ 1\\ 0
+	\end{bmatrix},
+	\begin{bmatrix}
+		0 \\ 1\\ 1
+	\end{bmatrix},
+	\begin{bmatrix}
+		1 \\ 0\\ 0
+	\end{bmatrix},
+	\begin{bmatrix}
+		1 \\ 0\\ 1
+	\end{bmatrix},
+	\begin{bmatrix}
+		1 \\ 1\\ 0
+	\end{bmatrix},
+	\begin{bmatrix}
+		1 \\ 1\\ 1
+	\end{bmatrix}
+	\right\}
+\end{equation*}
+The first and last vector of $\mathcal{S}_{upper} $ result in identical voltages at all three half-bridge output nodes and therefore result in a zero stator voltage space vector. Thus, they are referred to as the zero voltage vectors. The remaining six active vector can be used to direct the current flow through the machine.\\
+By applying the Clarke transform to the a vector of switching states, scaled by the DC-Link voltage of the inverter $U_{DC}$, the corresponding voltage space vectors can be determined.
+\[
+\begin{bmatrix}
+	u_{\alpha} \\ u_{\beta}
+\end{bmatrix} = 
+U_{DC} \cdot \clarke \cdot
+\begin{bmatrix}
+	s_{a,u} \\ s_{b,u} \\ s_{c,u} 
+\end{bmatrix}
+\]
+Applying this transformation to all eight switching states results in six equally spaced active voltage vectors and two zero voltage vectors located at the origin. The six active vectors form the well-known voltage hexagon of a 2L-VSI, as depicted in Figure \ref{fig:0_SRF_hexagon}. This voltage hexagon defines the set of voltage space vectors that can be directly generated by the inverter
+\begin{figure}[h]
+	\centering
+	\include{tikz/SRF_hexagon.tex}
+	\caption{Voltage Hexagon in SRF}
+	\label{fig:0_SRF_hexagon}
+\end{figure}
+
+\section{Model Predictive Control}
+
 \subsection{Comparison to classical control \label{sec:intro_comp_cs}}
 Using classical field-oriented PI current control, this is solved by splitting the system up into two linear, decoupled subsystems and two coupling terms (with the induced voltage acting affine to one of the).
 \begin{align*}
@@ -258,5 +291,3 @@ Using classical field-oriented PI current control, this is solved by splitting t
 \end{align*}
 The linear systems ${\Sigma_\mrm{d,decoupled}}$  and ${\Sigma_\mrm{q,decoupled}}$ are controlled using two independent PI controllers. The remaining terms are compensated by a feed-forward system.
 \\
-
-\section{2 Level Inverter} \label{sec:intro_vsi}

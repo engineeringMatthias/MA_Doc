@@ -413,13 +413,13 @@ Keeping the factor $1/2$ for the quadratic term in mind, the matrices $\bm \Gamm
 To ensure convexity,  $\bm{Q}, \bm{R}$ must be chosen such that $\bm{\Gamma}  \succ 0$.
 
 \subsection{Voltage Constraints} \label{sec:mpcc_opt_v}
-As mentioned in Section \ref{sec:intro_vsi}, the stator voltage vector $\bm{u}_S^S$ is subject to the constraints of the voltage hexagon spanned by the 6 active vectors. This is depicted in Figure \ref{fig:SRF_hexagon}.
+As mentioned in Section \ref{sec:intro_vsi}, the stator voltage vector $\bm{u}_S^S$ is subject to the constraints of the voltage hexagon spanned by the 6 active vectors. This is depicted in Figure \ref{fig:2_SRF_hexagon}.
 
 \begin{figure}[h]
 	\centering
 	\include{tikz/SRF_hexagon.tex}
 	\caption{Voltage Hexagon in SRF}
-	\label{fig:SRF_hexagon}
+	\label{fig:2_SRF_hexagon}
 \end{figure}
 
 These constraints can be formulated as a set of linear inequality constraints. For example, the upper flat border of the hexagon is described by 
@@ -858,7 +858,7 @@ For the implementation of this augmented system, one has to obtain the increment
 	\caption{MPC structure used in \cite{mpcWang} with the notation used in this thesis}
 	\label{fig:Wang_MPC}
 \end{figure}
-
+Where $ \mathcal{\bm P}_{\Delta x}$ is the prediction matrices for the incremental state feedback of the augmented system $\Sigma_\Delta$, similar to the structure of $\bm{P}_x$ as given by Equation \eqref{equ:2_prediction}. 
 The advantage of this approach, which introduces integrating behavior, is accompanied by the additional complexity due incremental states for prediction.
 
 \subsection{Hybrid Approach}\label{sec:mpcc_mpc_hybrid}
@@ -1298,7 +1298,7 @@ To achieve this, the prediction equation \eqref{equ:2_prediction} must be modifi
 %	\Tilde{\bm{P}}_{\Bar{\bm{\Delta u}}}
 %	\Bar{\bm{\Delta u}}[k+1|k]
 \Bar{\boldsymbol{y}}[k+2|k] = \underbrace{ \Tilde{\boldsymbol{P}}_{x} \hat{\boldsymbol{x}}[k+1|k]
-	+ \Tilde{\boldsymbol{P}}_u \boldsymbol{u}[k|k-1] + \Tilde{\boldsymbol{P}}_{E\omega}\Bar{\boldsymbol{E}}(\hat{\omega}[k+1|k]) }_{=:\Bar{\boldsymbol{g}}[k+1|k]} + \Tilde{\boldsymbol{P}}_{\Bar{\Delta u}} {\Bar{\boldsymbol{\Delta u}}}[k+1|k] 
+	+ \Tilde{\boldsymbol{P}}_u \boldsymbol{u}[k|k-1] + \Tilde{\boldsymbol{P}}_{E}\Bar{\boldsymbol{E}}(\hat{\omega}[k+1|k]) }_{=:\Bar{\boldsymbol{g}}[k+1|k]} + \Tilde{\boldsymbol{P}}_{\Bar{\Delta u}} {\Bar{\boldsymbol{\Delta u}}}[k+1|k] 
 	\label{equ:2_prediction_dtc}
 \end{equation}
 
@@ -1471,12 +1471,74 @@ Based on this system, the prediction for $\bm z[k+1]$ over $D_S$ is calculated. 
 	J_{is} = \dots + \wLNorm{\bar{z}}{W_I}%(\Bar{\bm z}[k+1])^T W_I (\Bar{z}[k+1])
 	\label{equ:2_Jis}
 \end{equation}
- To directly use this in the Quadratic Program \eqref{equ:2_QP}, the prediction vector $\bar{\bm{z}}[k+1]$ is expressed in terms of $\Deltaub$. Using a similar procedure as described in Section \ref{sec:prediction_horizon}, the prediction vector for $\bm z$ is calculated by 
-\[
-\Bar{\bm z}[k+1] = \underbrace{(\bm{1}_{N_P} \otimes \bm{I}_2) \bm{z}[k] + \bm{P}_T (\bm y[k] - \bm r[k])}_{:= \bm{\rho}_I \text{, known at instance }k} + \underbrace{ \bm{P}_T
-	\bm{P}_{\Delta u}}_{:=\bm{P}_I \text{, related to }\Deltaub} \cdot \Deltaub
-\]
-Where $P_T$ is lower triangular block matrix consisting of identity matrices as elements.\\ 
+ To directly use this in the Quadratic Program \eqref{equ:2_QP}, the prediction vector $\bar{\bm{z}}[k+1]$ is expressed in terms of $\Deltaub$. Using a similar procedure as described in Section \ref{sec:prediction_horizon}, the prediction vector for $\bm z$ is calculated by the recursive predictions
+ \begin{align*}
+ 	\bm z[k+1]
+ 	&=
+ 	\bm z[k] + \bm y[k] - \bm r[k],\\
+ 	\bm z[k+2]
+ 	&=
+ 	\bm z[k] + \left(\bm y[k]-\bm r[k]\right)
+ 	+ \left(\bm y[k+1]-\bm r[k+1]\right),\\
+ 	&\;\vdots\\
+ 	\bm z[k+N_P]
+ 	&=
+ 	\bm z[k]
+ 	+
+ 	\sum_{l=0}^{N_P-1}
+ 	\left(\bm y[k+l]-\bm r[k+l]\right).
+ \end{align*}. 
+ Using matrix notation this can be written as
+ \[
+ \Bar{\bm z}[k+1]	=
+ (\bm{1}_{N_P}\otimes\bm{I}_2)\bm{z}[k]
+ +
+ \bm{P}_T
+ \left(
+ \bar{\bm{y}}[k]
+ -
+ \Bar{\bm r}[k+1]
+ \right)
+ \]
+ where $P_T$ is lower triangular block matrix consisting of identity matrices as elements.
+ Substituting the Output Prediction \eqref{equ:2_prediction},
+ \[
+ \bar{\bm{y}}[k+1]
+ =
+ \bar{\bm{g}}[k]
+ +
+ \bm{P}_{\Delta u}\Deltaub
+ \]
+ into the recursive predictions above, the stacked integral-state
+ prediction becomes
+ \begin{align*}
+ 	\Bar{\bm z}[k+1]
+ 	&=
+ 	(\bm{1}_{N_P}\otimes\bm{I}_2)\bm{z}[k]
+ 	+
+ 	\bm{P}_T
+ 	\left(
+ 	\bar{\bm{g}}[k]
+ 	+
+ 	\bm{P}_{\Delta u}\Deltaub
+ 	-
+ 	\Bar{\bm r}[k+1]
+ 	\right)\\
+ 	&=
+ 	\underbrace{
+ 		(\bm{1}_{N_P}\otimes\bm{I}_2)\bm{z}[k]
+ 		+
+ 		\bm{P}_T
+ 		\left(
+ 		\bar{\bm{g}}[k]-\Bar{\bm r}[k+1]
+ 		\right)
+ 	}_{:=\,\bm{\rho}_I\text{, known at instance }k}
+ 	+
+ 	\underbrace{
+ 		\bm{P}_T\bm{P}_{\Delta u}
+ 	}_{:=\,\bm{P}_I\text{, related to }\Deltaub}
+ 	\Deltaub.
+ \end{align*}
 Due to the separation of the term $\bm{\rho}_I$ and the $\bm{P}_I$, $\Bar{\bm z}[k+1] = \bm{\rho}_I + \bm{P}_I  \Deltaub$, can easily be inserted into the modfied cost function $J_{is}$ of Equation \eqref{equ:2_Jis}.
 \[
 J_{is} = \| \bm{\Bar{y}}  - \bm{\Bar{r}} \|_{\bm Q}^2  + \wLNorm{\Bar{\boldsymbol{\Delta u}}}{R} + \| \bm{\rho}_I + \bm{P}_I  \Deltaub \|_{\bm{W}_I}^2
@@ -1532,7 +1594,7 @@ By adding a slackness variable $\eta_i$ to the left hand side of a linear inequa
 	m_i \zeta_i \le \mu_i + \eta_i
 	\label{equ:2_sc}
 \end{equation}
-where $m_i, \mu_i$ are scalar constants, the optimization variable $\zeta_i$ can violate this constraint. For every step in time, the constraint slackness $m_i \zeta_i[k] - \mu_i = \eta_i[k]$ is then minimized by an extra term in the cost function with a weighting factor $w_\eta$. This results in a mechanism, which allows for short-term constraint violations, due to the modification of Equation \eqref{equ:2_sc}, but the weighted term $\| \eta \|_{w_i}^2$, minimizes $\eta$.\\
+where $m_i, \mu_i$ are scalar constants, the optimization variable $\zeta_i$ can violate this constraint. For every step in time, the constraint slackness $m_i \zeta_i[k] - \mu_i = \eta_i[k]$ is then minimized by an extra term in the cost function with a weighting factor $w_\eta$. This results in a mechanism, which allows for short-term constraint violations, due to the modification of Equation \eqref{equ:2_sc}, but the linear term $\eta {w_\eta}$ of $J$, minimizes the slackness.\\
 The vector  of optimization variables is extended by the slackness variable  $\boldsymbol{\Bar{\Delta u}} \rightarrow \bm{\zeta} = \begin{bmatrix}
 	\bm{\Bar{\Delta u}}^\T & \eta
 \end{bmatrix}^\T$. To reduce the number of elements in $\bm{\zeta}$, it was decided to use one scalar slackness variable, which is scaled by the constant vector $ \bm{\rho} \; : \; \rho_i \in \mathbb{R},\; 0 \le \rho_i \le 1$. The linear inequalities of the Quadratic Program \eqref{equ:2_QP} are extended to 
@@ -1566,7 +1628,7 @@ With that, the total modified Quadratic Program \eqref{equ:2_QP_sc} can be writt
 			\bm{0}^T & w_{\eta}
 		\end{bmatrix} \bm{\zeta} +
 		\begin{bmatrix}
-			\Tilde{\bm{\gamma}}^T & 0
+			{\bm{\gamma}}^T & 0
 		\end{bmatrix} \bm{\zeta}
 		\\
 		\text{s.t. }& \begin{bmatrix}
@@ -1574,7 +1636,7 @@ With that, the total modified Quadratic Program \eqref{equ:2_QP_sc} can be writt
 			\bm{0}^T & 0
 		\end{bmatrix} 
 		\underbrace{\begin{bmatrix}
-				\Bar{\bm{\Delta u}}\\ \eta^2
+				\Bar{\bm{\Delta u}}\\ \eta
 		\end{bmatrix}}_{\bm{\zeta}}
 		\leq \begin{bmatrix}
 			{\bm{\mu}} \\ /
@@ -1584,19 +1646,33 @@ With that, the total modified Quadratic Program \eqref{equ:2_QP_sc} can be writt
 \end{equation}
 The matrix $\left[\bm{I}^{mD_S \times mD_S}\;\vdots\;\bm{0}^{mD_S\times 1} \right]$ is used in order for $\Deltaub$ to be the optimization target (without $\eta$). In the implementation $[\bm{I}_2\; \bm{0}_2 \; \hdots\; \bm{0}_2 \; 0 ]$ instead of $\left[\bm{I}\;\vdots\;\bm{0} \right]$, such that only the first voltage vector $\bm{\Delta u}[k]$ is applied.
 
-\subsubsection{Simulation}
+\section{Chosen Implementation}
+\subsection{Controller Structure}
+\subsection{Simulation}
+To validate the Hybrid MPC Implementation with deadtime compensation and soft constraints, a speed profile was simulated using MATLAB\textsuperscript{\textregistered} Simulink\textsuperscript{\textregistered}. In this simulation, the MPC has an imperfect model of the PMSM (for PMSM parameters, see Table \ref{tab:params_NW3} and tuning parameters Table \ref{tab:typ_params_mpcc}), with $1.25 \cdot R_S ,1.12 \cdot L_d,1.17 \cdot L_q,0.97\cdot \psi_{PM}$, an ideal pulse-amplitude modulation inverter with one-step switching delay and the mechanical system, modeled as a damped oscillator, according to Equation \eqref{equ:1_coupling}. \\
+For this simulation the PMSM was controlled in speed mode with the model predictive current controller and an PI speed controller (with back-calculation for anti-windup). Figure \ref{fig:2_sim_ref} depicts the speed reference and the resulting reference currents due to the speed controller. 
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=\textwidth]{Figs/2_sim_wramp_reference_sc.eps}
 	\caption{Simulated speed ramp: reference quantities}
 	\label{fig:2_sim_ref}
 \end{figure}
+As it can be seen in Figure \ref{fig:2_sim_ref} and \ref{fig:2_sim_control}, three different phases were distinguished:
+\begin{enumerate}
+	\item \textbf{Acceleration}: To accelerate the machine from standstill, the speed controller requests torque using the maximum current. Due to the differential speed on the machine shaft, an oscillation can be observed. 
+	\item \textbf{Over-Modulation}: After approximately $1.4$ s, the required stator voltage space vector reaches the limit of the inscribed circle at $U_{DC}/ \sqrt{3}$.  The voltage constrained of the current controller were artificially lowered, in order to test the constrained operation. With $U_{DC} = 140\sqrt{3}$ and a speed reference of $n_{ref,1} = \qty{1530}{rpm}$, the voltage hexagon will be fully utilized.
+	\item \textbf{Deceleration}: At $t=\qty{2}{s}$, the speed controller initiates braking by requesting negative current in the Q axis. Due to the change in speed, the mechanical system will oscillate.
+\end{enumerate}
+
+The quantities of Figure \ref{fig:2_sim_ref} can be interpreted as inout quantities for MPCC, which outputs the stator voltage in order to control the stator according to the Optimization Problem \eqref{equ:2_QP_sc}. The resulting stator voltages and currents are depicted in Figure \ref{fig:2_sim_control}. To visualize the hexagonal current constraints, the limits regarding inscribed circle at $U_{DC}/ \sqrt{3}$ and the outer circle $2/3 \cdot U_{DC}$ are depicted as well as the circular current constraint $\|\bm{i}_S\| \le I_{max}$.
+
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=\textwidth]{Figs/2_sim_wramp_control_sc.eps}
 	\caption{Simulated speed ramp: control quantities}
 	\label{fig:2_sim_control}
 \end{figure}
+In Figure \ref{fig:2_sim_control} one can observe the oscillations in voltage and current during the over-modulation phase. In the following, these quantities are depicted in detail for each of the three phases separately (see Figures \ref{fig:2_sim_phase1}, \ref{fig:2_sim_phase2} and \ref{fig:2_sim_phase3}).
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=\textwidth]{Figs/2_sim_wramp_constraints_sc.eps}
@@ -1610,9 +1686,8 @@ The matrix $\left[\bm{I}^{mD_S \times mD_S}\;\vdots\;\bm{0}^{mD_S\times 1} \righ
 	\label{fig:2_sim_constr_detail}
 \end{figure}
 As it can be seen the output of the MPC, would violate the voltage constraints by up to 5V during the deceleration phase. The first outlier happens $\qty{7}{\micro s}$ and the last $\qty{11}{\micro s}$ after the reference change. \\
-This issue does not improve if the MPC is provided with an actual reference trajectory, instead of copying the value for the current reference over $D_s$. Since the rotor speed deceleration is at maximum during that interval, it can be assumed that the prediction error due to $\hat{\omega}[k+1] = \omega[k]$ is to blame for that.   
-
-Detailed phases:
+This issue does not improve if the MPC is provided with an actual reference trajectory, instead of copying the value for the current reference over $D_s$. Since the rotor speed deceleration is at maximum during that interval, it can be assumed that the prediction error due to $\hat{\omega}[k+1] = \omega[k]$ is to blame for that.\\
+In the following the stator voltages and currents for the acceleration, constant maximum speed and deceleration phase will be discussed.
 
 \begin{figure}[H]
 	\centering
@@ -1628,19 +1703,25 @@ Detailed phases:
 	\caption{Simulated speed ramp: Phase 1 - Acceleration}
 	\label{fig:2_sim_phase1}
 \end{figure}
+
+In Figure \ref{fig:2_sim_phase1} the initial step response for the current controller is depicted for the case of hard and soft current constraints. With the use of soft constraints, one can achieve a faster convergence rate. However, since the controller parameters were not adapted in that simulation, this benefit of soft constraints cannot be observed here.
+
+
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=\textwidth]{Figs/2_sim_wramp_control_phase2_sc.eps}
 	\caption{Simulated speed ramp: Phase 2 - Over-modulation due to active voltage constraints}
 	\label{fig:2_sim_phase2}
 \end{figure}
+
+Figure \ref{fig:2_sim_phase2} depicts the stator quantities during continuous maximum speed. Since the $\bm{u}_S$ travels at the border of the voltage hexagon, one can see oscillations in its waveform with peak-to-peak amplitude of $(2/3 - 1/\sqrt{3})U_{DC}$ and an angular frequency of $6\omega_e$. The D axis current also exhibits an ripple, but does not contribute much to the length of the voltage space vector due to its small amplitude. Due to those oscillations, the current and electric torque will also show a ripple.
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=\textwidth]{Figs/2_sim_wramp_control_phase3_sc.eps}
 	\caption{Simulated speed ramp: Phase 3 - Deceleration}
 	\label{fig:2_sim_phase3}
 \end{figure}
-
+In the last phase, shown in Figure \ref{fig:2_sim_phase3}, the deceleration phase can be inspected. At $t=\qty{2}{s}$, the electric brake with $i_{q,ref} < 0$ is initiated. Due to the sudden change in rotor speed, the mechanical system will start to oscillate. The resulting ripple in $\omega_e$ enters into the controller as scheduling variable. Due to the assumption of constant rotor speed over the prediction horizon this may result in a further model mismatch. \reminder{TODO: schauen ob da $\Gamma$ immer noch positiv definit}
 \section{Experimental Evaluation}
 
 
@@ -1651,13 +1732,8 @@ Detailed phases:
 The experimental evaluation is conducted on a motor test bench located at the Electric Drives and Machines Institute of Graz University of Technology. The setup consists of an induction machine and a PMSM (see Table \ref{tab:params_NW3}), which are mechanically coupled.\\
 Each machine is supplied by a dedicated 2 Level VSI, with the electrical interconnections of the individual drives shown in Figures \ref{fig:2_NW3_testbed} and \ref{fig:2_inverter_structure}.  The rotor position is measured by a position sensor mounted on the shaft of the PMSM with an incremental encoder.
 
-The control algorithms are implemented in MATLAB\textsuperscript{\textregistered} using user-defined MATLAB functions, while the simulation models are developed and evaluated in MATLAB\textsuperscript{\textregistered} Simulink\textsuperscript{\textregistered}. Real-time execution of the control algorithms is carried out using a dSPACE DS1005 AutoBox and a dSPACE DS1202 MicroLabBox. The interaction with the real-time control system and the adjustment of control parameters are performed on a host PC using ControlDesk by dSPACE.
-\begin{figure}
-	\centering
-	\includegraphics[width=0.7\textwidth]{Figs/2_inverter_structure.png}
-	\caption{Two-level inverter driving the PMSM and induction machine.\\Image source: \cite{InverterStruct}}
-	\label{fig:2_inverter_structure}
-\end{figure}
+The control algorithms are implemented in MATLAB\textsuperscript{\textregistered} using user-defined MATLAB functions, while the simulation models are developed and evaluated in MATLAB\textsuperscript{\textregistered} Simulink\textsuperscript{\textregistered}. Real-time execution of the control algorithms is carried out using a dSPACE DS1202 MicroLabBox. The interaction with the real-time control system and the adjustment of control parameters are performed on a host PC using ControlDesk by dSPACE.
+
 
 \begin{figure}
 	\centering

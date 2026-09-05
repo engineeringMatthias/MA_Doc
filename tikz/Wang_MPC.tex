@@ -25,13 +25,17 @@
 	\draw[->] (node8.south) -- (7.29,1.78) -- (5.75,1.78);
 	\draw[->] (node3.west) -- (node4.east);
 	\draw[fill=black] (4.56,1.78) circle (0.08cm);
-	
-	\draw[->] (node4.west) -- (0.8,1.78) -- (0.8,2.45);
-	
-	\draw[->] (4.56,1.78) -- (4.56,1) -- (-1,1) -- (-1,2.45);
+	\node[draw, shape=isosceles triangle, minimum height=38pt, rotate=180] (node14) at (0.78,1.78) {};
 	
 	\node at (1.71,2.06) {$\Delta x[k]$};
 	
-	\node at (0.5,1.33) {$x[k]$};
+	\node[minimum width=19pt] at (0.63,1.78) {$ \mathcal{P}_{\Delta x}$};
 	\draw[->] (0.5,4.12) -- (node1.north);
+	\draw[->] (node4.west) -- (node14.west);
+	
+	\draw[->] (node14.east) -- (-0.68,1.78) -- (-0.68,2.49);
+	
+	\node at (1.81,1.05) {$x[k]$};
+	
+	\draw[->] (4.56,1.78) -- (4.56,0.67) -- (-1,0.64) -- (-1,2.49);
 \end{tikzpicture}
