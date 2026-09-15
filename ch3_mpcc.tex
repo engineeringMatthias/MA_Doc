@@ -51,7 +51,7 @@ For the ease of notation, $\omega = \omega_e = \omega_{m1}p$ refers to the elect
 %\]
 For a variety of applications it is beneficial to work with linear models, since this allows for the use of broad framework of control schemes. However, the affine term regarding the induced voltage $\bm{E}_c(\omega(t))$ is non-negligable for the current dynamics $\Dot{\x}$ at every operating point except standstill or locked rotor operation.\\
 
-As mentioned in Section \reminder{$ref{sec:intro_comp_cs}$}, using model predictive control, one can directly use a MIMO formulation, leading to a direct consideration the D/Q axis coupling. The question remaining is whether a discretized model of Equation \eqref{equ:2_apv_ss} shall be directly used or a step-wise linearization approach around an operating point shall be employed. For the linearization, one would define an operating point as
+As mentioned in Section \ref{sec:0_mpc}, using model predictive control, one can directly use a MIMO formulation, leading to a direct consideration the D/Q axis coupling. The question remaining is whether a discretized model of Equation \eqref{equ:2_apv_ss} shall be directly used or a step-wise linearization approach around an operating point shall be employed. For the linearization, one would define an operating point as
 \begin{equation*}
 	\bm{x}_c
 	=
@@ -863,7 +863,7 @@ The advantage of this approach, which introduces integrating behavior, is accomp
 
 \subsection{Hybrid Approach}\label{sec:mpcc_mpc_hybrid}
 Since the basic MPC formulation does not inherently guarantee offset-free tracking under constant disturbances, such as model faults and the embedded integrator according to Wang hinders extensions and constraint formulations due to its incremental states, a way searched to combine the benefits of those two approaches. \\
-To obtain an MPC using absolute states $\x[k] = [i_{d}\; i_{q}]^\T$ and still having no direct feedback for $\bm{u}[k-1]$ for the locally unconstrained controller, like in the Embedded Integrator structure of, a hybrid structure of these two approaches was designed. The result is depicted in Figure \ref{fig:Hybrid_MPC}.
+To obtain an MPC using absolute states $\x[k] = [i_{d}\; i_{q}]^\T$ and still having no direct feedback for $\bm{u}[k-1]$ for the locally unconstrained controller, like in the Embedded Integrator structure of Figure \ref{fig:Wang_MPC}, a hybrid structure of these two approaches was designed. The result is depicted in Figure \ref{fig:Hybrid_MPC}.
 \\
 The idea behind this structure is to use the state description to estimate what input $\Tilde{{\bm{u}}}[k-1]$ was applied to the plant such that it leads to the measured states $x[k]$. By doing so, input disturbances $\bm{d}_1[k-1] = \Tilde{{\bm{u}}}[k-1] - {{\bm{u}}}[k-1]$ are considered. 
 \begin{equation*}
@@ -1646,11 +1646,37 @@ With that, the total modified Quadratic Program \eqref{equ:2_QP_sc} can be writt
 \end{equation}
 The matrix $\left[\bm{I}^{mD_S \times mD_S}\;\vdots\;\bm{0}^{mD_S\times 1} \right]$ is used in order for $\Deltaub$ to be the optimization target (without $\eta$). In the implementation $[\bm{I}_2\; \bm{0}_2 \; \hdots\; \bm{0}_2 \; 0 ]$ instead of $\left[\bm{I}\;\vdots\;\bm{0} \right]$, such that only the first voltage vector $\bm{\Delta u}[k]$ is applied.
 
+%% TODO
+
+\begin{comment}
+\subsection{Extension: time optimal pre-rotation}
+In \cite{rrccWang}
+
+	\begin{figure}[H]
+		\centering
+		\includegraphics[width=0.8\linewidth]]{Figs/2_to_principle_in_use.png}
+		\caption{No RPR\\Image Source: \cite{rrccWang}
+			\label{fig:2_rpr_no}
+		\end{figure}
+		
+		\begin{figure}[H]
+			\centering
+			\includegraphics[width=0.8\linewidth]]{Figs/2_to_principle_in_use.png}
+			\caption{$\psi_S^S$ varying in tracking and maintaining process
+				caused by time optimal pre-rotation.\\ Image Source: \cite{rrccWang}}
+			\label{fig:2_yes_rpr_yes}
+		\end{figure}
+\end{comment}
+
 \section{Chosen Implementation}
+\reminder{...}
+\subsection{Computational Effort}
+\reminder{...}
 \subsection{Controller Structure}
+\reminder{...}
 \subsection{Simulation}
-To validate the Hybrid MPC Implementation with deadtime compensation and soft constraints, a speed profile was simulated using MATLAB\textsuperscript{\textregistered} Simulink\textsuperscript{\textregistered}. In this simulation, the MPC has an imperfect model of the PMSM (for PMSM parameters, see Table \ref{tab:params_NW3} and tuning parameters Table \ref{tab:typ_params_mpcc}), with $1.25 \cdot R_S ,1.12 \cdot L_d,1.17 \cdot L_q,0.97\cdot \psi_{PM}$, an ideal pulse-amplitude modulation inverter with one-step switching delay and the mechanical system, modeled as a damped oscillator, according to Equation \eqref{equ:1_coupling}. \\
-For this simulation the PMSM was controlled in speed mode with the model predictive current controller and an PI speed controller (with back-calculation for anti-windup). Figure \ref{fig:2_sim_ref} depicts the speed reference and the resulting reference currents due to the speed controller. 
+To validate the Hybrid MPC Implementation with deadtime compensation and soft constraints, a speed profile was simulated using MATLAB\textsuperscript{\textregistered} Simulink\textsuperscript{\textregistered}. In this simulation, the MPC has an imperfect model of the PMSM (for PMSM parameters, see Table \ref{tab:params_NW3} and tuning parameters Table \ref{tab:typ_params_mpcc}), with $1.25 \cdot R_S ,1.12 \cdot L_d,1.17 \cdot L_q,0.97\cdot \psi_{PM}$. An ideal pulse-amplitude modulation inverter with one-step switching delay is used and the mechanical system is modeled as a damped oscillator, according to Equation \eqref{equ:1_coupling}. \\
+For this simulation the PMSM is controlled in speed mode with the model predictive current controller and an PI speed controller (with back-calculation for anti-windup). Figure \ref{fig:2_sim_ref} depicts the speed reference and the resulting reference currents due to the speed controller. 
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=\textwidth]{Figs/2_sim_wramp_reference_sc.eps}
@@ -1664,7 +1690,7 @@ As it can be seen in Figure \ref{fig:2_sim_ref} and \ref{fig:2_sim_control}, thr
 	\item \textbf{Deceleration}: At $t=\qty{2}{s}$, the speed controller initiates braking by requesting negative current in the Q axis. Due to the change in speed, the mechanical system will oscillate.
 \end{enumerate}
 
-The quantities of Figure \ref{fig:2_sim_ref} can be interpreted as inout quantities for MPCC, which outputs the stator voltage in order to control the stator according to the Optimization Problem \eqref{equ:2_QP_sc}. The resulting stator voltages and currents are depicted in Figure \ref{fig:2_sim_control}. To visualize the hexagonal current constraints, the limits regarding inscribed circle at $U_{DC}/ \sqrt{3}$ and the outer circle $2/3 \cdot U_{DC}$ are depicted as well as the circular current constraint $\|\bm{i}_S\| \le I_{max}$.
+The quantities of Figure \ref{fig:2_sim_ref} can be interpreted as interface quantities for the MPCC, which outputs the stator voltage in order to control the stator current according to the Optimization Problem \eqref{equ:2_QP_sc}. The resulting stator voltages and currents are depicted in Figure \ref{fig:2_sim_control}. To visualize the hexagonal current constraints, the limits regarding inscribed circle at $U_{DC}/ \sqrt{3}$ and the outer circle $2/3 \cdot U_{DC}$ are depicted as well as the circular current constraint $\|\bm{i}_S\| \le I_{max}$.
 
 \begin{figure}[H]
 	\centering
@@ -1672,7 +1698,7 @@ The quantities of Figure \ref{fig:2_sim_ref} can be interpreted as inout quantit
 	\caption{Simulated speed ramp: control quantities}
 	\label{fig:2_sim_control}
 \end{figure}
-In Figure \ref{fig:2_sim_control} one can observe the oscillations in voltage and current during the over-modulation phase. In the following, these quantities are depicted in detail for each of the three phases separately (see Figures \ref{fig:2_sim_phase1}, \ref{fig:2_sim_phase2} and \ref{fig:2_sim_phase3}).
+In Figure \ref{fig:2_sim_control} oscillations in voltage and current can be observed during the over-modulation phase. In the following, these quantities are depicted in detail for each of the three phases separately (see Figures \ref{fig:2_sim_phase1}, \ref{fig:2_sim_phase2} and \ref{fig:2_sim_phase3}).
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=\textwidth]{Figs/2_sim_wramp_constraints_sc.eps}
@@ -1685,8 +1711,8 @@ In Figure \ref{fig:2_sim_control} one can observe the oscillations in voltage an
 	\caption{Simulated speed ramp: voltage and current constraints, detail during deceleration phase}
 	\label{fig:2_sim_constr_detail}
 \end{figure}
-As it can be seen the output of the MPC, would violate the voltage constraints by up to 5V during the deceleration phase. The first outlier happens $\qty{7}{\micro s}$ and the last $\qty{11}{\micro s}$ after the reference change. \\
-This issue does not improve if the MPC is provided with an actual reference trajectory, instead of copying the value for the current reference over $D_s$. Since the rotor speed deceleration is at maximum during that interval, it can be assumed that the prediction error due to $\hat{\omega}[k+1] = \omega[k]$ is to blame for that.\\
+As it can be seen the output of the MPC, could violate the voltage constraints by up to 5 V during the deceleration phase. The first outlier happens $\qty{7}{\micro s}$ and the last $\qty{11}{\micro s}$ after the reference change. \\
+This issue does not improve if the MPC is provided with an actual reference trajectory, instead of copying the value for the current reference over $D_s$. Since the rotor speed deceleration is at maximum during that interval, it can be assumed that the prediction error due to $\hat{\omega}[k+1] = \omega[k]$ is the reason for that.\\
 In the following the stator voltages and currents for the acceleration, constant maximum speed and deceleration phase will be discussed.
 
 \begin{figure}[H]
@@ -1730,7 +1756,7 @@ In the last phase, shown in Figure \ref{fig:2_sim_phase3}, the deceleration phas
 \subsection{Test Setup}
 
 The experimental evaluation is conducted on a motor test bench located at the Electric Drives and Machines Institute of Graz University of Technology. The setup consists of an induction machine and a PMSM (see Table \ref{tab:params_NW3}), which are mechanically coupled.\\
-Each machine is supplied by a dedicated 2 Level VSI, with the electrical interconnections of the individual drives shown in Figures \ref{fig:2_NW3_testbed} and \ref{fig:2_inverter_structure}.  The rotor position is measured by a position sensor mounted on the shaft of the PMSM with an incremental encoder.
+Each machine is supplied by a dedicated 2 Level VSI, with the electrical interconnections of the individual drives shown in Figures \ref{fig:2_NW3_testbed}.  The rotor position is measured by a position sensor mounted on the shaft of the PMSM with an incremental encoder.
 
 The control algorithms are implemented in MATLAB\textsuperscript{\textregistered} using user-defined MATLAB functions, while the simulation models are developed and evaluated in MATLAB\textsuperscript{\textregistered} Simulink\textsuperscript{\textregistered}. Real-time execution of the control algorithms is carried out using a dSPACE DS1202 MicroLabBox. The interaction with the real-time control system and the adjustment of control parameters are performed on a host PC using ControlDesk by dSPACE.
 
@@ -1763,33 +1789,13 @@ The control algorithms are implemented in MATLAB\textsuperscript{\textregistered
 \subsection{Step Response}
 \subsection{Constrained Operation}
 
-\section{Comparison of the MPC Approaches}\label{sec:mpcc_comp}
+%% TODO
+\begin{comment}
+  \section{Comparison of the MPC Approaches}\label{sec:mpcc_comp}
 \subsection{Steady State Behavior}
 \subsection{Timing Uncertainties}
 \subsection{Constrained Operation}
-\subsection{Computational Effort}
-
-
-\subsection{Extension: time optimal pre-rotation}
-In \cite{rrccWang}
-
-\begin{comment}
-	\begin{figure}[H]
-		\centering
-		\includegraphics[width=0.8\linewidth]]{Figs/2_to_principle_in_use.png}
-		\caption{No RPR\\Image Source: \cite{rrccWang}
-			\label{fig:2_rpr_no}
-		\end{figure}
-		
-		\begin{figure}[H]
-			\centering
-			\includegraphics[width=0.8\linewidth]]{Figs/2_to_principle_in_use.png}
-			\caption{$\psi_S^S$ varying in tracking and maintaining process
-				caused by time optimal pre-rotation.\\ Image Source: \cite{rrccWang}}
-			\label{fig:2_yes_rpr_yes}
-		\end{figure}
+  
 \end{comment}
-
-
-\chapter{Observer based Current Prediction}\label{ch:ipred}
+%\chapter{Observer based Current Prediction}\label{ch:ipred}
 
