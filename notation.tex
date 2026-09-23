@@ -1,109 +1,100 @@
 \section*{Notation}
 \textbf{Note:} The column Code in the following tables refers to the variable name in the MATLAB\textsuperscript{\textregistered} Simulink\textsuperscript{\textregistered} scripts and simulation models. \\
-\reminder{Die Tabelle werden noch übersetzt/angepasst}
 
 \begin{table}[H]
 	\centering
-	\caption{Modellierung Symbole}
+	\caption{Modeling Symbols}
 	\begin{tabular}{c|c|l}
-		Symbol & Code & Beschreibung \\
+		Symbol & Code & Description \\
 		\hline
-		$ \varphi_e , \varphi_m $ & & Rotorposition \\
-		$\omega_e, \omega_m$ & \verb|we, wm| & Rotorgeschwindigkeit elektrisch, mechanisch \\
-		%$\boldsymbol{\varphi}$ & \verb|phi_vec|  & $\boldsymbol{\varphi}^T = [\varepsilon, \Dot{\varepsilon}, \Ddot{\varepsilon}] = [\varepsilon, \omega, \Dot{\omega}]$ \\
-		$ \psi$ &  & magnetische Flussverkettung \\
-		$u$ &  & elektrische Spannung - immer die Stellgröße im Regelkreis \\
-		$i$ &  & \\
-		$i_{S,filter}$ &  & aufgrund Strommesskette gefilterter Statorstrom \\
-		$p$ & & Polpaarzahl\\
-		$L$ & &  \\
-		$R$ & &  \\
-		
-		
+		$\varphi_e, \varphi_m$ & \verb|phi_e, phi_m| & Rotor position (electrical, mechanical) \\
+		$\omega_e, \omega_m$ & \verb|we, wm| & Rotor speed (electrical, mechanical) \\
+		$\psi$ & \verb|psi| & Magnetic flux linkage \\
+		$u$ & \verb|u| & Electrical voltage \\
+		$i$ & \verb|i| & Electrical current \\
+		$p$ & \verb|p| & Number of pole pairs \\
+		$L$ & \verb|L| & Inductance \\
+		$R$ & \verb|R| & Resistance \\
 	\end{tabular}
-	%	\label{tab:placeholder}
 \end{table}
 
+
 \begin{table}[H]
 	\centering
-	\caption{Regelung Symbole}
+	\caption{Control Symbols}
 	\begin{tabular}{c|c|l}
-		Symbol & Code & Beschreibung \\
+		Symbol & Code & Description \\
 		\hline
-		$A$ &  & Systemmatrix $\mathbb{R}^{n \times  n}$\\
-		$B$ &  & Eingangsmatrix $\mathbb{R}^{m \times  n}$\\
-		$C$ &  & Ausgangangsmatrix $\mathbb{R}^{n \times  q}$\\
-		$E$ &  & Affiner Term des Zustandsmodells, induzierte Spannung in RRF \\
-		%G& & Freihalten für QP, gemeinsam mit $\gamma,  \Gamma$\\
-		$\x$&  & Zustandsvektor $\mathbb{R}^{n \times  1}$\\
-		$\xi$&   & Erweiterter Zustandsvektor \\
-		u& & Eingangsvektor $\mathbb{R}^{m \times  1}$\\
-		$\Delta u, \Bar{\Delta u}$ & \verb|Delta_uk(_b)| & Differentieller Eingangsvektor, $\overline{\text{Prädiktionsvektor}}$ für ${\Delta u}$ über $N_P$ \\
-		y & & Ausgang $\mathbb{R}^{q \times  1}$ \\
-		$N_P, N_C, D_S$ & & Prädiktionshorizont, Regelungshorizont, Entscheidungsschritte\\
-		d & & Störung  \\
-		$P_x, P_u,P_{\Bar{\Delta u}}, P_{E\omega}$& & Vorhersage-Matrizen respektive $x, u, \Bar{\Delta u}$, $E(\omega[k])$\\
-		%$P_{\Bar{\Delta u}, accum}$ & &${\text{Prädiktionsmatrix}}$, akkumuliert  ${\Bar{\Delta u}} \rightarrow \Bar{u}$\\
-		%          ${D}_{dq\alpha \beta}$ & & inv. Park Transformation; Rotationsmatrix$^T$ $\in \mathbb{R}^2$\\
-		%          ${N}_{dq\alpha \beta}$ &  & Blockdiagonalmatrix aus $D_S$-vielen ${D}_{dq\alpha \beta}(\varepsilon)$\\
-		$T_S$ &  & Abtastzeit, Regelkreis\\
-		$\Lambda, \lambda$ & & Luenberger Beobachter Verstärkung \\
-		$ \eta $ & & Soft Constraint \\
-		$ \boldsymbol{\rho} $ & & Skalierungs/Aktivierungsvektor für skalares $\eta$ \\
-		
+		$A$ & \verb|A| & System matrix $\mathbb{R}^{n \times n}$ \\
+		$B$ & \verb|B| & Input matrix $\mathbb{R}^{n \times m}$ \\
+		$C$ & \verb|C| & Output matrix $\mathbb{R}^{q \times n}$ \\
+		$E$ & \verb|E| & Affine term of state space model $\mathbb{R}^{n \times 1}$ \\
+        $g$ & \verb|g| & Auxiliary prediction term, see \eqref{equ:2_prediction}\\
+		${x}$ & \verb|x| & State vector $\mathbb{R}^{n \times 1}$ \\
+		$\xi$ & \verb|xi| & Augmented state vector \\
+		${u}$ & \verb|u| & Input vector $\mathbb{R}^{m \times 1}$ (always electric voltage) \\
+		$\Delta {u}$ & \verb|Delta_u| & Incremental input vector \\
+		$y$ & \verb|y| & Output vector $\mathbb{R}^{q \times 1}$ \\
+		$N_P$ & \verb|Np| & Prediction horizon \\
+        $D_s$ & \verb|Ds| & Decision steps $=N_P-1$, for delay compensation \\
+		$d$ & \verb|d| & Disturbance \\
+		$P_x, P_u, P_{\Delta u}, P_E$ & \verb|Px, Pu, PDelta_u, PE| & Prediction matrices for $x, u, \Delta u, E(\omega[k])$ \\
+		$P_T$ & \verb|Pt| & Lower block-triangular identity matrix \\
+		$\eta$ & \verb|eta| & Slackness variable for soft constraints \\
+		$\bm{\rho}$ & \verb|rho| & Scaling/activation vector for scalar $\eta$ \\
+	\end{tabular}
+\end{table}
+
+
+\begin{table}[H]
+	\centering
+	\caption{Symbol Decorations with $x$ as Example Symbol}
+	\begin{tabular}{c|c|l}
+		Symbol & Code & Description \\
+		\hline
+		$\boldsymbol{x}, \boldsymbol{X}$ & & Vector, Matrix \\
+		$\Dot{x}, \Ddot{x}$ & Prefix d & 1st, 2nd time derivative \\
+		$\Hat{x}$ & Suffix h & Estimated quantity \\
+		$\overline{\boldsymbol{x}}, \overline{\boldsymbol{X}}$ & Suffix b & Predicted vector (over $N_P$), matrix required for prediction \\
+		$\Tilde{x}$ & Suffix t & Modification, variation of $x$ \\
+		$\underline{x}$ & & Space vector \\
+		$x^*$ & Suffix opt & Optimal quantity \\
 	\end{tabular}
 	%\label{tab:placeholder}
 \end{table}
 
 \begin{table}[H]
 	\centering
-	\caption{Symboldekorationen mit $x$ als Beispielsymbol}
+	\caption{Coordinate Systems}
 	\begin{tabular}{c|c|l}
-		Symbol & Code & Beschreibung \\
+		Symbol & Code & Description \\
 		\hline
-		$\boldsymbol{x}, \boldsymbol{X}$ &  & Vektor, Matrix \\
-		$\Dot{x}, \Ddot{x}$  & Präfix d & 1., 2. zeitliche Ableitung \\
-		$\Hat{x}$ & Suffix h & geschätzte Größe \\
-		$\overline{\boldsymbol{x}}, \overline{\boldsymbol{X}}$ & Suffix b & prädizierter Vektor (über $N_P$) , für Prädiktion benötigte Matrix \\
-		$\Tilde{x}$ & Suffix t&  Modifikation, Abwandlung von $x$\\
-		$\underline{x}$ & & komplexer Zeiger \\ 
-		$x^*$ & Suffix opt & optimale Größe \\
+		$\alpha, \beta$ & SRF & Stator reference frame \\
+		$d, q$ & RRF & Rotor reference frame \\
+		$a, b, c$ & & Motor terminal based \\
+		$\clarke$ & \verb|T.C| & Transformation from 3-phase system to SRF \\
+		$\park$ & & Transformation from SRF to RRF for current $\varphi[k]$ \\
+		$\predPark$ & & $\park$ for prediction vector \\
+		$\iclarke = \clarke^{\dagger}$ & \verb|T.iC| & Inverse transform: SRF to 3-phase \\
+		$\ipark = \park^{-1}$ & & Inverse transform: RRF to SRF \\
 	\end{tabular}
-	%	\label{tab:placeholder}
+	%\label{tab:placeholder}
 \end{table}
 
 \begin{table}[H]
 	\centering
-	\caption{Koordinatensysteme}
-	\begin{tabular}{c|c|l}
-		Symbol & Code & Beschreibung \\
+	\caption{Operators}
+	\begin{tabular}{c|l}
+		Symbol & Description \\
 		\hline
-		$\alpha, \beta$  & SRF & Stator festes KS \\
-		$ d, q$ & RRF & Rotorfestes KS \\
-		$ a,b,c $ &  & Motoranschluss basiert \\
-		$\clarke $&  \verb|T.C| & Transformation from 3 phase system to SRF\\
-		$\park $ & &Transformation form SRF to RRF for current $\varphi[k]$\\ 
-		$\predPark$ &  & $\park$ for prediction vector \\
-		$\iclarke  = \clarke^{\dagger} $ & \verb|T.iC|& Inverse Transform: SRF to 3 phase \\
-		$\ipark =  \park^{-1} $ &  & Inverse Transform: RRF to SRF \\ 
-	\end{tabular}
-%	\label{tab:placeholder}
-\end{table}
-
-\begin{table}[H]
-	\centering
-	\caption{Operatoren}
-	\begin{tabular}{c|c|l}
-		Symbol & Code & Beschreibung \\
-		\hline
-		$\sigma()$  &  & Spektrum einer Matrix \\
-		$s$ & & Laplace Variable \\
-		$z$ &  & Z-Transformation Variable\\
-		$\bm{X}^{\dagger}$ & & Moore-Penrose Pseudo-Inverse\\
-		$\wLNorm{x}{Q}$ & & Quadrtic Form of $\bm{x}$ with weighting $ \x^\T \bm{Q} \x$ \\
-		$\nabla_{\bm{x}} J $ & & Gradient of $J$ with respect to $x$ \\
-		$\nabla_{\bm{x}}^2 J $ & & Hessian Matrix  $J$ with respect to $x$ \\
-		$\Sigma:$& & Systemdefinition (Zustandsraumodell)\\
+		$\sigma()$ & Spectrum of a matrix \\
+		$s$ & Laplace variable \\
+		$z$ & Z-transform variable \\
+		$\bm{X}^{\dagger}$ & Moore-Penrose pseudo-inverse \\
+		$\wLNorm{x}{Q}$ & Quadratic form of $\bm{x}$ with weighting $\x^\T \bm{Q} \x$ \\
+		$\nabla_{\bm{x}} J$ & Gradient of $J$ with respect to $x$ \\
+		$\nabla_{\bm{x}}^2 J$ & Hessian matrix of $J$ with respect to $x$ \\
+		$\Sigma:$ & System definition (state-space model) \\
 	\end{tabular}
 	%\label{tab:placeholder}
 \end{table}

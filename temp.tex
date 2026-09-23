@@ -1,0 +1,119 @@
+\newpage
+
+Ihr Ausgangspunkt, ist zuerst den nächsten Zustand, hervorgerufen durch $u[k|k-1] = \Delta u[k|k-1] + u[k-1|k-2]$, zu schätzen und basierend darauf die Prädiktion anzusetzen:
+\[
+\hat{\bm{x}}[k+1|k] = \Aw \bm{x}[k] + \bm{B}\bm{u}[k|k-1] + \Ew
+\]
+\[
+\Bar{\boldsymbol{y}}[k+2|k] = { \Tilde{\boldsymbol{P}}_{x} \hat{\bm{x}}[k+1|k] 
+	+ \Tilde{\boldsymbol{P}}_u \boldsymbol{u}[k|k-1] + \Tilde{\boldsymbol{P}}_{E}{\boldsymbol{E}}(\omega[k]) }+ \Tilde{\boldsymbol{P}}_{\Bar{\Delta u}} {\Bar{\boldsymbol{\Delta u}}}[k+1|k] 
+\]
+Während mein ursprünglicher Ansatz gewesen wäre, das $\hat{{x}}[k+1|k] $ implizit über die Prädiktionsmatrizen, basierend auf dem echten Messwert $ {x}[k]$ zu rechnen. \\
+Daher war mein Ansatz:
+
+\begin{equation}
+\Bar{\boldsymbol{y}}[k+2|k] = { \Tilde{\boldsymbol{P}}_{x} {\boldsymbol{x}}[k]
+	+ \Tilde{\boldsymbol{P}}_u \boldsymbol{u}[k-1|k-2] + \Tilde{\boldsymbol{P}}_{E}{\boldsymbol{E}}({\omega}[k]) } + \Tilde{\boldsymbol{P}}_{\Bar{\Delta u}} {\Bar{\boldsymbol{\Delta u}}}[k+1|k] 
+	\label{equ:2_prediction_dtc}
+\end{equation}
+Mein ursprünglicher verzögerungskompensierter Ansatz im Detail:\\
+(Da wäre nett gewesen, dass ich im Vergleich zum unkompensierten Ansatz bei allen Prädiktionsmatrizen einfach nur die erste Zeile löschen hätte müsste).
+
+\begin{equation}
+	\begin{aligned}
+		&\underbrace{
+			\begin{bmatrix}
+				\hat{\bm{y}}[k+2] \\
+				\vdots \\
+				\hat{\bm{y}}[k+D_s]
+			\end{bmatrix}
+		}_{\Bar{\bm{y}}[k+2|k]}
+		=
+		\underbrace{
+			\begin{bmatrix}
+				\bm{C}\left(\Aw\right)^2 \\
+				\vdots \\
+				\bm{C}\left(\Aw\right)^{D_s}
+			\end{bmatrix}
+		}_{\Tilde{\bm{P}}_x}
+		{\bm{x}}[k]
+		+
+		\underbrace{
+			\begin{bmatrix}
+				\bm{C}\left(\Aw+\I\right)\B \\
+				\vdots \\
+				\bm{C}\left(\displaystyle\sum_{l=0}^{D_s-1}
+				\left(\Aw\right)^l\right)\B
+			\end{bmatrix}
+		}_{\Tilde{\bm{P}}_u}
+		\bm{u}[k-1|k-2]
+		\\[1ex]
+		&\quad+
+		\underbrace{
+			\begin{bmatrix}
+				\bm{C}\left(\bm{A}(\omega[k])+\bm{I}\right)\bm{B}
+				&
+				\bm{C}\bm{B}
+				&
+				\cdots
+				&
+				\bm{0}_2
+				\\[0.5ex]
+				\bm{C}\left(
+				\left(\bm{A}(\omega[k])\right)^2
+				+\bm{A}(\omega[k])
+				+\bm{I}
+				\right)\bm{B}
+				&
+				\bm{C}\left(\bm{A}(\omega[k])+\bm{I}\right)\bm{B}
+				&
+				\ddots
+				&
+				\vdots
+				\\
+				\vdots
+				&
+				\vdots
+				&
+				\ddots
+				&
+				\bm{0}_2
+				\\
+				\bm{C}\left(
+				\displaystyle\sum_{l=0}^{D_s-1}
+				\left(\bm{A}(\omega[k])\right)^l
+				\right)\bm{B}
+				&
+				\bm{C}\left(
+				\displaystyle\sum_{l=0}^{D_s-2}
+				\left(\bm{A}(\omega[k])\right)^l
+				\right)\bm{B}
+				&
+				\cdots
+				&
+				\bm{C}\bm{B}
+			\end{bmatrix}
+		}_{\Tilde{\bm{P}}_{\Bar{\bm{\Delta u}}}}
+		\underbrace{
+			\begin{bmatrix}
+				\boldsymbol{\Delta u}[k+1] \\
+				\vdots \\
+				\boldsymbol{\Delta u}[k+D_s-1]
+			\end{bmatrix}
+		}_{\Bar{\bm{\Delta u}}[k+1|k]}
+		\\[1ex]
+		&\quad+
+		\underbrace{
+			\begin{bmatrix}
+				\bm{C}\left(\Aw+\I\right) \\
+				\vdots \\
+				\bm{C}\left(
+				\displaystyle\sum_{l=0}^{D_s-1}
+				\left(\Aw\right)^l
+				\right)
+			\end{bmatrix}
+		}_{\Tilde{\bm{P}}_E}
+		\Ew .
+	\end{aligned}
+	\label{equ:prediction_full_dtc}
+\end{equation}

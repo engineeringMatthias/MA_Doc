@@ -1,9 +1,7 @@
 \chapter{Introduction}\label{ch:introduction}
 \section{Space Vector Theory} \label{sec:0_sv} 
 Due to benefits regarding the mathematical modeling of electrical three-phase system, space vectors are commonly used. The idea behind this, is to describe real-valued three-phase quantities as one complex-valued quantity. By doing so, a change of reference frames is easily achieved (as shown in Section \ref{sec:0_refframes})  and  an intuitive description of the magnitude and phase angle of a three-phase system is provided. \\
-
 For a balanced sinusoidal three-phase current system, the phase currents can be expressed as 
-
 \begin{equation*}
 	\begin{split}
 		i_a(t) &= I\cos\omega t,\\
@@ -12,22 +10,18 @@ For a balanced sinusoidal three-phase current system, the phase currents can be 
 	\end{split}
 	\label{equ:0_current_sequence}
 \end{equation*}
-
 Those sinusoidal waves with constant angular frequency can be expressed as complex quantities $ \hat{I},\; \hat{I} e^{\J 2\pi/3},\; \hat{I} e^{-\J 2\pi/3}$, with fixed angle of $120^\circ$ relative to each other, as depicted in Figure \ref{fig:0_sv}.
-
 \begin{figure}
 	\centering
 	\include{tikz/SV_abc.tex}
 	\caption{Three phase system definition with complex quantities}
 	\label{fig:0_sv}
 \end{figure}
-
 The instantaneous phase quantities can be represented by the complex space vector
 \[
 \underline{i}_{S} = \frac{2}{3} \left( {I} + {I} e^{\J 2\pi/3} + {I} e^{-\J 2\pi/3}  \right).
 \]
-The scaling factor $2/3$ is chosen such that the magnitude of the space vector corresponds to the amplitude of the balanced three-phase quantity. In general, the use of a complex space vector does not require the three-phase quantities to be sinusoidal or to have a constant frequency
-Defining $i_\alpha = \RE\{\underline{i}_{abc}\}$ and $i_\beta = \IM\{\underline{i}_{abc}\}$, the commonly known Clarke transform for balanced systems, as in three phase system without connection of the neutral star point, can be derived. \\
+The scaling factor $2/3$ is chosen such that the magnitude of the space vector corresponds to the amplitude of the balanced three-phase quantity. In general, the use of a complex space vector does not require the three-phase quantities to be sinusoidal or to have a constant frequency. Defining $i_\alpha = \RE\{\underline{i}_{S}\}$ and $i_\beta = \IM\{\underline{i}_{S}\}$, the commonly known Clarke transform for balanced systems, as in three phase system without connection of the neutral star point, can be derived. \\
 Even though this transformation seems like a projection, no information is lost when the zero sequence condition $i_a + i_b + i_c = 0$ is considered.
 
 \begin{equation}
@@ -49,17 +43,18 @@ Even though this transformation seems like a projection, no information is lost 
 	\end{bmatrix}.
 	\label{equ:0_clarke}
 \end{equation}
+The real-valued vector $\bm{i}_S^S = [i_\alpha \;i_\beta]^\T$ corresponds to the complex space vector $\underline{i}_S^S = i_\alpha + \J i_\beta$. For modeling purposes, the space vector representation simplifies coordinate system transformations, while the real vector representation is used for control purposes to ensure a real-valued state vector.\\
 Although $\clarke$ is not a square matrix, the inverse transform can be defined via the Moore-Penrose pseudo-inverse $\iclarke  = \clarke^{\dagger}$.\\
 The Clarke transform can be thought of as a convenient mathematical description for the three phase quantities by using a space vector. As mentioned, this eases the transformation between coordinate systems. This will be shown in the following section.
 
 \section{Reference Frames} \label{sec:0_refframes}
-Two reference frames for the stator current and voltage space vector are of interest. The first one is the stationary reference frame (SRF). In this frame of reference the space vector is a direct representation of the quantities, which can be directly measured at the terminals of the machine. Therefore the constraints, due to the generation of the stator voltage is stationary in this frame of reference. Quantities described in this reference frame are indicated with a superscript $^S$.\\
-Due to the orientation of the magnetic main flux linkage relative to  the rotor, it is beneficial to also describe these quantities in a reference frame fixed to the rotor. This frame will be called the rotating reference frame (RRF). By doing so, the real or direct component of this vector $\RE\{\underline{i}_S^R\} = i_d$ is oriented in the same axis as the flux linkage of the permanent magnets $\underline{\psi}_{PM}$ and the imaginary or quadrature component $\IM\{\underline{i}_S^R\} = i_q$ will be rotated by $90^\circ$. Consequently, the D axis current $i_d$ primarily influences the flux-producing component of the stator current, whereas the Q axis current $i_q$ can be interpreted as the torque-producing component of the stator current. Space vectors in this frame of reference are marked with a superscript $^R$. 
+Two reference frames for the stator current and voltage space vector are of interest. The first one is the stationary reference frame (\acrshort{srf}). In this frame of reference the space vector is a direct representation of the quantities, which can be directly measured at the terminals of the machine. Therefore, the constraints, due to the generation of the stator voltage is stationary in this frame of reference. Quantities described in this reference frame are indicated with a superscript $^S$.\\
+The permanent magnet flux linkage is fixed relative to the rotor, as is the saliency, which refers to the two inductances $L_d$ and $L_q$. Due to this configuration, it is beneficial to describe the electric and magnetic stator quantities in a rotor fixed reference frame. This frame will be called the rotating reference frame (\acrshort{rrf}). By doing so, the real or direct component of this vector $\RE\{\underline{i}_S^R\} = i_d$ is oriented in the same axis as the flux linkage of the permanent magnets $\underline{\psi}_{PM}$. This leads to positive $i_d$ strengthening the permanent magnet flux linkage, negative $i_d$ weakening it. For non-salient machines $L_d = L_q$, the imaginary or quadrature component $\IM\{\underline{i}_S^R\} = i_q$ directly influences the electric torque. To describe the torque of salient-pole machines, the influence of $i_d$ due to reluctance torque according to the full Torque Relation \eqref{equ:1_pmsm_torque} has to be considered as well.\\
+Therefore, $i_d$ is the flux-producing component of the stator current. To ensure minimum stator current for maximum torque, $|i_d$| is kept as low as possible (at base speed, its reference is set to zero and for field-weakening operation $i_d<0$) and $i_q$ is used primarily to influences the electric torque. Space vectors in the rotating frame of reference are marked with a superscript $^R$. 
 
 
 \subsection{Coordinate Frame Transformation} \label{sec:0_coordtrans}
-As mentioned in the previous section, a transformation rule is needed, to translate quantities from the SRF to the RRF and vice versa.
-
+As mentioned in the previous section, a transformation rule is needed, to translate quantities from the \acrshort{srf} to the \acrshort{rrf} and vice versa.\\
 To describe this transformation an arbitrary space vector $\underline{z}$ is considered. In the stationary reference frame, the vector can be expressed as
 
 \begin{equation*}
@@ -95,7 +90,7 @@ The same space vector can be expressed in the rotating reference frame as
 \begin{figure}[h]
 	\centering
 	\include{tikz/Coord_frame_Transition.tex}
-	\caption{Arbitrary space vector $\underline{z}$ in SRF and RRF}
+	\caption{Arbitrary space vector $\underline{z}$ in \acrshort{srf} and \acrshort{rrf}}
 	\label{fig:0_refframes}
 \end{figure}
 
@@ -109,7 +104,7 @@ where $\kappa$ denotes the angle of the space vector relative to the D axis. The
 	%	\label{equ:0_sv_rrf_components}
 \end{equation*}
 
-The angle between the $\alpha$-axis of the SRF and the $d$-axis of the RRF is defined by the electrical angle $\varphi_e =  \varphi$, as illustrated in Figure \ref{fig:0_refframes}. Due to that displacement, the space vector is transformed from the stationary to the rotating reference frame by a rotation of $-\varphi$. Hence,
+The angle between the $\alpha$-axis of the \acrshort{srf} and the $d$-axis of the \acrshort{rrf} is defined by the electrical angle $\varphi_e =  \varphi$, as illustrated in Figure \ref{fig:0_refframes}. Due to that displacement, the space vector is transformed from the stationary to the rotating reference frame by a rotation of $-\varphi$. Hence,
 
 \begin{equation*}
 	\underline{z}^{R}
@@ -142,19 +137,20 @@ Expanding the right-hand side and comparing the real and imaginary parts yields
 The transformation can then be written in matrix form as
 
 \begin{equation}
-	\begin{bmatrix}
-		z_\alpha\\
-		z_\beta
+    \begin{bmatrix}
+		z_d\\
+		z_q
 	\end{bmatrix}
 	=
 	\begin{bmatrix}
 		\cos\varphi & \sin\varphi\\
 		-\sin\varphi & \cos\varphi
 	\end{bmatrix}
-	\begin{bmatrix}
-		z_d\\
-		z_q
-	\end{bmatrix}.
+    	\begin{bmatrix}
+		z_\alpha\\
+		z_\beta
+	\end{bmatrix}
+	.
 	\label{equ:0_dq_to_alpha_beta}
 \end{equation}
 
@@ -168,8 +164,8 @@ Since this transformation rule can be applied for a any vector quantity, the sta
 	=
 	\underbrace{
 		\begin{bmatrix}
-			\cos\varphi & -\sin\varphi\\
-			\sin\varphi & \cos\varphi
+			\cos\varphi & \sin\varphi\\
+			-\sin\varphi & \cos\varphi
 	\end{bmatrix}}_{\parkArg{\varphi}}
 	\begin{bmatrix}
 		i_\alpha\\
@@ -201,18 +197,15 @@ The inverse transformation is given by
 Since $\parkArg{\varphi}$ is a orthonormal matrix, $\iparkArg{\varphi} =\left(\parkArg{\varphi}\right)^{-1} = \left(\parkArg{\varphi}\right)^{\T}$ holds \cite{KaR2}. In literature $\parkArg{\varphi}$ is commonly referred to as the Park transform and $\iparkArg{\varphi}$ as the inverse Park transform.
 
 
-\section{2-Level Voltage Source Inverter}
-To generate the phase voltages for the control of the machine, while maintaining the high power required to operate it, a switched system is needed. This is commonly achieved using a two-level voltage source inverter (2L-VSI). The topology of such an 2L-VSI is depicted in Figure \ref{fig:0_inverter_structure}. It consists of one half bridge for each of the three phases, supplied by an DC voltage source (or rectified AC voltage).
-
+\section{2-Level Voltage Source Inverter} \label{sec:intro_vsi}
+To generate the phase voltages for the control of the machine, while maintaining the high power required to operate it, a switched system is needed. This is commonly achieved using a two-level voltage source inverter (\acrshort{2lvsi}). The topology of such a \acrshort{2lvsi} is depicted in Figure \ref{fig:0_inverter_structure}. It consists of one half bridge for each of the three phases, supplied by an DC voltage source (or rectified AC voltage).
 \begin{figure}[h]
-	\centering{	\includegraphics[width=0.7\textwidth]{Figs/2_inverter_structure.png}}
+	\centering{	\includegraphics[width=0.9\textwidth]{Figs/2_inverter_structure.png}}
 	\caption{Two-level inverter driving a 3-phase motor. Image source: \cite{InverterStruct}}
 	\label{fig:0_inverter_structure}
 \end{figure}
-
-In theory, each of the six semiconductor switches can be controlled independently. However, during normal operation, these switches are operated in a complementary manner. Turning on both switches simultaneously would short-circuit the DC link and cause a shoot-through event. To prevent this, a short dead time is typically introduced when changing between switching states, during which both switches of a half-bridge are turned off. During this interval, the stator current can continue to flow through the freewheeling diodes (or body diodes respectively).\\
-
-Since the PMSM considered here has no neutral connection, it will only react on the differential voltage signals with respect to the half bridge output nodes. Apart from the dead-time during interlocking, the state of the upper switch directly determines the state of the lower switch. With that, there are $2^3=8$ possible states in which the switches can be controlled. By defining $\bm{s}_{upper}^\T = [s_{a,u}\; s_{b,u}\; s_{c,u}]$ as the vector of the state of the upper switches, the set of all switching states can be written down:
+In theory, each of the six semiconductor switches can be controlled independently. However, during normal operation, the switches of a halfbridge are operated in a complementary manner. Turning on both switches simultaneously would short-circuit the DC link and cause a shoot-through event. To prevent this, a short dead time is typically introduced when changing between switching states, during which both switches of a half-bridge are turned off. During this interval, the stator current can continue to flow through the freewheeling diodes (or body diodes respectively).\\
+Since the \acrshort{pmsm} considered here has no neutral connection, it will only react on the differential voltage signals with respect to the half bridge output nodes. Apart from the dead-time during interlocking, the state of the upper switch directly determines the state of the lower switch. With that, there are $2^3=8$ possible states in which the switches can be controlled. By defining $\bm{s}_{upper}^\T = [s_{a,u}\; s_{b,u}\; s_{c,u}]$ as the vector of the state of the upper switches, the set of all switching states can be written down:
 \begin{equation}
 	\mathcal{S}_{upper} = \left\{
 	\begin{bmatrix}
@@ -242,8 +235,8 @@ Since the PMSM considered here has no neutral connection, it will only react on 
 	\right\}
     \label{equ:0_Supper}
 \end{equation}
-The first and last vector of $\mathcal{S}_{upper} $ result in identical voltages at all three half-bridge output nodes and therefore result in a zero stator voltage space vector. Thus, they are referred to as the zero voltage vectors. The remaining six active vector can be used to direct the current flow through the machine.\\
-By applying the Clarke transform to the a vector of switching states, scaled by the DC-Link voltage of the inverter $U_{DC}$, the corresponding voltage space vectors can be determined.
+The first and last vector of $\mathcal{S}_{upper} $ result in identical voltages at all three half-bridge output nodes and therefore result in a zero stator voltage space vector. Thus, they are referred to as the zero voltage vectors. The remaining six active vectors can be used to direct the current flow through the machine.\\
+By applying the Clarke transform to a vector of switching states, scaled by the DC-Link voltage of the inverter $U_{DC}$, the corresponding voltage space vectors can be determined.
 \[
 \begin{bmatrix}
 	u_{\alpha} \\ u_{\beta}
@@ -253,11 +246,11 @@ U_{DC} \cdot \clarke \cdot
 	s_{a,u} \\ s_{b,u} \\ s_{c,u} 
 \end{bmatrix}
 \]
-Applying this transformation to all eight switching states results in six equally spaced active voltage vectors and two zero voltage vectors located at the origin. The six active vectors form the well-known voltage hexagon of a 2L-VSI, as depicted in Figure \ref{fig:0_SRF_hexagon}. This voltage hexagon defines the set of voltage space vectors that can be directly generated by the inverter
+Applying this transformation to all eight switching states results in six equally spaced active voltage vectors and two zero voltage vectors located at the origin. The six active vectors form the well-known voltage hexagon of a \acrshort{2lvsi}, as depicted in Figure \ref{fig:0_SRF_hexagon}. This voltage hexagon defines the set of voltage space vectors that can be directly generated by the inverter.
 \begin{figure}[H]
 	\centering
-	\include{tikz/SRF_hexagon.tex}
-	\caption{Voltage Hexagon in SRF}
+	\include{tikz/SRF_hexagon_wCircles.tex}
+	\caption{Voltage Hexagon in \acrshort{srf}}
 	\label{fig:0_SRF_hexagon}
 \end{figure}
 
@@ -265,11 +258,11 @@ Applying this transformation to all eight switching states results in six equall
 In Model Predictive Control (MPC), a model of the plant is used to predict its future behavior for a sequence of candidate control inputs. The control inputs are optimized with respect to a defined cost function while satisfying the relevant system constraints. \\
 \begin{figure}[h]
     \centering
-    \includegraphics[width=0.7\linewidth]{Figs/0_MPC_scheme_basic.png}
-    \caption{\reminder{Wikipedia Bild - wird geändert}}
+    \include{tikz/MPC_principle}
+    \caption{Fundamentals of Model Predictive Control}
     \label{fig:0_mpc_scheme}
 \end{figure}
-For the prediction a mathematical model, such as a state space description, or a data-driven model is used. Using knowledge of plant states at the current sampling step $x(kT_S) = x[k]$ (with $k\in\mathbf{Z}$ and $T_S$ as the sampling time), an input-dependent prediction regarding the future behavior of the plant can be made. Since an MPC is typically implemented on a digital processor, a discrete number of future steps is used. This is typically referred to as the prediction horizon $N_P$. During this horizon, the effect of a discrete number of control inputs, also referred to as the control horizon $N_C$, with $N_C \le N_P$, on plant states and output is considered. The plant inputs for the control horizon are chosen optimally with respect to a certain cost function $J$ and plant constraints. The cost function can be designed such that not only tracking errors are minimized but also other application-specific unwanted effects are punished. Due to the control law being formulated as an optimization problem, limits regarding plant inputs $u$ or states $x$ can be easily considered as constraints. By defining the set of valid plant states as $\mathcal{X}$ and valid inputs as $\mathcal{U}$, the optimization problem can be written down as the following
+For the prediction a mathematical model, such as a state space description, or a data-driven model is used. Using knowledge of plant states at the current sampling step $x(kT_S) = x[k]$ (with $k\in\mathbb{Z}$ and $T_S$ as the sampling time), an input-dependent prediction regarding the future behavior of the plant can be made. Since an MPC is typically implemented on a digital processor, a discrete number of future steps is used. This is typically referred to as the prediction horizon $N_P$. During this horizon, the effect of a discrete number of control inputs, also referred to as the control horizon $N_C$, with $N_C \le N_P$, on plant states and output is considered. As it will be explained in Section \ref{sec:2_op}, $N_C = N_P$ is used in this thesis. The plant inputs for the control horizon are chosen optimally with respect to a certain cost function $J$ and plant constraints. The cost function can be designed such that not only tracking errors are minimized but also other application-specific unwanted effects are punished. Due to the control law being formulated as an optimization problem, limits regarding plant inputs $u$ or states $x$ can be easily considered as constraints. By defining the set of valid plant states as $\mathcal{X}$ and valid inputs as $\mathcal{U}$, the optimization problem can be written down as the following
 \begin{equation}
     \begin{split}
             \Bar{u}[k]^* &= \arg \min_{\Bar{u}[k]}\; J(\bar{u}[k])\\
@@ -283,17 +276,16 @@ In the Optimization Problem \eqref{equ:0_sample_op}, the prediction vector of in
 \Bar{u}[k] = \left[ u[k] \; u[k+1] \; \hdots \; u[k+N_C-1]   \right]^\T.
 \]
 and the optimal sequence $\Bar{u}[k]^* $ is the solution of that problem. Although $N_C$ control inputs are obtained by solving \eqref{equ:0_sample_op}, only the first control input is applied to the plant. At the next sampling instant, after obtaining the plant state by measurement or observation, the optimization problem is solved again, and the obtained first control input is applied. The method used, often known as the receding-horizon principle, is repeated at every sampling instant.\\
-This framework allows for the usage of a compact control law, which is able to plan the future plant inputs while considering limits of complex Multiple-Input-Multiple-Output (MIMO) Systems. Another benefit of this control strategy is its flexibility for various extensions. As an example, for field oriented control, deadtime compensation is a commonly used. With MPC this is easily achieved by defining the optimization problem for one step in time ahead (see Section \ref{sec:ext_deadt_comp}). \\
-For field oriented current control of an PMSM, the circular constraints of the stator currents $\boldsymbol{i}_{S} \in \mathcal{I}_S$ and the hexagonal input constraints regarding the stator voltage of the 2L-VSI $\boldsymbol{u}_{S} \in \mathcal{U}_S$ must be obeyed. Since the stator voltage computed for the current step in time $\boldsymbol{u}_{S}^S[k]$ influences the stator current, which will be measured in the next step in time, the output constraints are formulated in terms of an estimation $\hat{\boldsymbol{i}}_{S}[k+1]$. For the sake of the argument in this example cost function an arbitrary vector norm of tracking error shall be minimized.
+This framework allows for the usage of a compact control law, which is able to plan the future plant inputs while considering limits of complex Multiple-Input-Multiple-Output (MIMO) Systems. Another benefit of this control strategy is its flexibility for various extensions. As an example, for field oriented control, dead time compensation is a commonly used. With MPC this is easily achieved by defining the optimization problem for one step in time ahead (see Section \ref{sec:ext_deadt_comp}). \\
+For field oriented current control of an \acrshort{pmsm}, the circular constraints of the stator currents $\boldsymbol{i}_{S} \in \mathcal{I}_S$ and the hexagonal input constraints regarding the stator voltage of the \acrshort{2lvsi} $\boldsymbol{u}_{S} \in \mathcal{U}_S$ must be obeyed. Since the stator voltage computed for the current step in time $\boldsymbol{u}_{S}^S[k]$ influences the stator current, which will be measured in the next step in time, the output constraints are formulated in terms of an estimation $\hat{\boldsymbol{i}}_{S}[k+1]$. For the sake of the argument in this example cost function an arbitrary vector norm of tracking error shall be minimized.
 \[
 \|\hat{\boldsymbol{i}}_{S}[k+1] -\boldsymbol{i}_{S,ref}[k+1]\| = \|\boldsymbol{e}_S[k+1]\| 
 \]
-Due to the receding horizon principle the trajectory of the tracking error is minimized, instead of the expected tracking error during the next period 
-.
+Due to the receding horizon principle the trajectory of the tracking error is minimized, instead of the expected tracking error during the next period . To indicate such prediction vectors, a $\bar{\text{bar}}$ over the respective variable is used. 
 \[
-\Bar{\bm e}_S[k+1] = \left[ \bm{e}_S[k+1] \; \bm{e}_S[k+2] \; \hdots \; \bm{e}_S[k+N_P]   \right]^\T
+\Bar{\bm e}_S^\T[k+1] = \left[ \bm{e}_S^\T[k+1] \; \bm{e}_S^\T[k+2] \; \hdots \; \bm{e}_S^\T[k+N_P]   \right]
 \]
-Considering this, one could define an MPC control law as the following
+Considering this, one could define an MPC control law as the following:
 
 \begin{equation*}
 	 \left( 
@@ -307,21 +299,21 @@ Considering this, one could define an MPC control law as the following
 \end{equation*}
 \subsection{Control Set Formulation}
 
-The choice of the control set determines how the inverter voltage is represented and optimized in MPC. Depending on whether the control inputs are restricted to the discrete switching states or allowed to vary continuously within the feasible voltage region, MPC can be formulated as either Finite Control Set MPC (FCS-MPC) or Continuous Control Set MPC (CCS-MPC).
+The choice of the control set determines how the inverter voltage is represented and optimized in MPC. Depending on whether the control inputs are restricted to the discrete switching states or allowed to vary continuously within the feasible voltage region, MPC can be formulated as either Finite Control Set MPC (\acrshort{fcs}-MPC) or Continuous Control Set MPC (CCS-MPC).
 
 \subsubsection{Finite Control Set}
 
-In Finite Control Set MPC (FCS-MPC), the possible control inputs are restricted to a finite set of predefined values. For the 2L-VSI considered here, these inputs correspond directly to the eight possible switching states, defined in the set $\mathcal{S}_{upper}$ of Equation \eqref{equ:0_Supper}. The switching state is used directly as the control input of the inverter, eliminating the need for a separate modulation stage. The optimization problem is solved by evaluating the finite set of possible switching states and selecting the one that minimizes the defined cost function.\\
+In Finite Control Set MPC (\acrshort{fcs}-MPC), the possible control inputs are restricted to a finite set of predefined values. For the \acrshort{2lvsi} considered here, these inputs correspond directly to the eight possible switching states, defined in the set $\mathcal{S}_{upper}$ of Equation \eqref{equ:0_Supper}. The switching state is used directly as the control input of the inverter, eliminating the need for a separate modulation stage. The optimization problem is solved by evaluating the finite set of possible switching states and selecting the one that minimizes the defined cost function.\\ % vllt cite FCSCompWang as well
 Due to the absence of a modulation stage, the FCS-MPC must adequately choose when to apply zero vectors. Considering this, the sampling time is usually chosen significantly smaller than for Continuous Control Set MPC.
-As shown in \cite{NeunerMA} \reminder{[?]}, by choosing a sampling time $T_S$, which allows for solving the MPC optimization problem online, the resulting ripple on  the stator current is significant. Even though a variety of ripple mitigation strategy for FCS-MPC were introduced \reminder{[?]}, a similar smoothness of output current and torque to PI-FOC or CCS-MPC cannot be achieved. Therefore this scheme is not considered in this thesis.
+As shown in \cite{NeunerMA} \cite{FCSCompBoek}, by choosing a sampling time $T_S$, which allows for solving the MPC optimization problem online, the resulting ripple on  the stator current is significant. Even though a variety of ripple mitigation strategies for FCS-MPC were introduced \cite{FCSCompLi}, a similar smoothness of output current and torque to \acrshort{pi}-FOC or \acrshort{ccs}-MPC cannot be achieved. Therefore this scheme is not considered in this thesis.
 
 \subsubsection{Continuous Control Set}
-In contrast to FCS-MPC, Continuous Control Set MPC (CCS-MPC) formulation allow any voltage space vector, inscribed by the inverter hexagon to be used as a control input to the electric drive. For the 2L-VSI, this region is given by the voltage hexagon shown in Figure \ref{fig:0_SRF_hexagon}.\\
-To achieve the generation of control voltages which are not active voltage vectors or zero vectors, as defined in the set $\mathcal{S}_{upper}$ of Equation \eqref{equ:0_Supper} a modulation scheme is employed. To utilize all of the feasible region of the voltage hexagon, Space Vector Pulse Width Modulation (SVPWM) is typically used \cite{InverterStruct}. With CCS-MPC, the stator current ripple depends on the switching frequency and the modulation scheme used. Compared to FCS-MPC with a similar sampling frequency, the current ripple is much lower in amplitude. Therefore, only CCS-MPC is considered in this thesis.
+In contrast to FCS-MPC, Continuous Control Set MPC (\acrshort{ccs}-MPC) formulation allow any voltage space vector, inscribed by the inverter hexagon to be used as a control input to the electric drive. For the \acrshort{2lvsi}, this region is given by the voltage hexagon shown in Figure \ref{fig:0_SRF_hexagon}.\\
+To achieve the generation of control voltages which are not active voltage vectors or zero vectors, as defined in the set $\mathcal{S}_{upper}$ of Equation \eqref{equ:0_Supper} a modulation scheme is employed. To utilize all of the feasible region of the voltage hexagon, Space Vector Pulse Width Modulation (SVPWM) is typically used \cite{InverterStruct}. With \acrshort{ccs}-MPC, the stator current ripple depends on the switching frequency and the modulation scheme used. Compared to FCS-MPC with a similar sampling frequency, the current ripple is much lower in amplitude. Therefore, only CCS-MPC is considered in this thesis.
 
 
-\subsection{Comparison to classical PI field oriented control \label{sec:intro_comp_cs}}
-Using classical field-oriented PI current control, the field-oriented control of a PMSM can be achieved by splitting the voltage equation (as it will be derived in Section \ref{sec:model_pmsm}) up into two linear, decoupled subsystems and two coupling terms:
+\subsection{Comparison to classical \acrshort{pi} field oriented control \label{sec:intro_comp_cs}}
+Using classical field-oriented \acrshort{pi} \acrshort{foc}, the field-oriented control of a \acrshort{pmsm} can be achieved by splitting the voltage equation (as it will be derived in Section \ref{sec:model_pmsm}) up into two linear, decoupled subsystems and two coupling terms:
 \begin{align*}
 	\Dot{i_{Sd}}
 	&=
@@ -347,6 +339,7 @@ Using classical field-oriented PI current control, the field-oriented control of
 		\frac{1}{L_q} \, \psi_{PM} \omega 
 	}_{\Sigma_\mrm{q,affine}}
 \end{align*}
-The linear systems $\Sigma_\mrm{d,decoupled}$ and $\Sigma_\mrm{q,decoupled}$ are controlled using two independent PI controllers. The remaining coupling and back-EMF terms are compensated by a feed-forward system.\\
-In contrast, CCS-MPC considers the complete coupled $dq$-model within its prediction model. The cross-coupling and back-EMF terms are therefore inherently considered when predicting the future current evolution, without requiring explicit decoupling through feed-forward compensation. Furthermore, the $d$- and $q$-axis voltage components are optimized simultaneously. \\
-Another difference is the treatment of the inverter voltage constraint. In PI-FOC, the voltage reference generated by the PI controllers is typically limited subsequently by the modulation stage, requiring measures such as anti-windup to handle saturation. In CCS-MPC, the voltage constraint can be included directly in the optimization problem.
+The linear systems $\Sigma_\mrm{d,decoupled}$ and $\Sigma_\mrm{q,decoupled}$ are controlled using two independent \acrshort{pi} controllers. The remaining coupling and back-\acrshort{emf} terms are compensated by a feed-forward system.\\
+In contrast, CCS-MPC considers the complete coupled $dq$-model within its prediction model. The cross-coupling and back-\acrshort{emf} terms are therefore inherently considered when predicting the future current evolution, without requiring explicit decoupling through feed-forward compensation. Furthermore, the $d$- and $q$-axis voltage components are optimized simultaneously. \\
+Another difference is the treatment of the inverter voltage constraint. In \acrshort{pi}-\acrshort{foc}, the voltage reference generated by the \acrshort{pi} controllers is typically limited subsequently by the modulation stage, requiring measures such as anti-windup to handle saturation. In \acrshort{ccs}-MPC, the voltage constraint can be included directly in the optimization problem.\\
+To compensate for the switching and computation delay, Smith-Predictor based approaches are commonly used for field-oriented control of PMSMs. A few publications in this field resorted to predictive observer based approaches to cope with this problem \cite{XuchenPMSMiObs}. Both approaches require an additional system which compensates the delay. Since an MPC is build around a model-based prediction, including dead time compensation here, comes without additional computational effort. For details refer to Section \ref{sec:ext_deadt_comp}.
