@@ -1654,7 +1654,7 @@ Using the compact notation for weighted quadratic forms, the new $\bm{\Gamma}_I$
 \end{align*}
 \begin{align*}
     {\bm{\Gamma}}_I &= 2\left(\predDeltaU^\T\!\left(\bm{Q}+\bm{Q}_I\right)\predDeltaU + \bm{R}\right) \\
-    \bm{\gamma_I} &= \bm{\gamma} + \bm{\gamma}_I
+    \bm{\gamma_I} &= \bm{\gamma} + \bm{\gamma}_{is}
 \end{align*}
 Eventually, the augmented optimization problem can be written as:
 \begin{equation}
@@ -1813,7 +1813,7 @@ As it can be seen in Figure \ref{fig:2_sim_ref} and \ref{fig:2_sim_control}, thr
 \begin{enumerate}
 	\item \textbf{Acceleration}: To accelerate the machine from standstill, the speed controller requests torque using the maximum current. Due to the differential speed on the machine shaft, an oscillation can be observed. 
 	\item \textbf{Over-Modulation}: After approximately $1.4$ s, the required stator voltage space vector reaches the limit of the inscribed circle at $U_{DC}/ \sqrt{3}$.  The voltage constrained of the current controller were artificially lowered, in order to test the constrained operation. With $U_{DC} = 140\sqrt{3}$ and a speed reference of $n_{ref,1} = \qty{1530}{rpm}$, the voltage hexagon will be fully utilized.
-	\item \textbf{Deceleration}: At $t=\qty{2}{s}$, the speed controller initiates braking by requesting negative current in the Q axis. Due to the change in speed, the mechanical system will oscillate.
+	\item \textbf{Deceleration}: At $t=\qty{2}{s}$, the speed controller initiates braking by requesting negative current in the $q$ axis. Due to the change in torque, the mechanical system will oscillate.
 \end{enumerate}
 
 The quantities of Figure \ref{fig:2_sim_ref} can be interpreted as interface quantities for the MPCC, which outputs the stator voltage in order to control the stator current according to the Optimization Problem \eqref{equ:2_QP_sc}. The resulting stator voltages and currents are depicted in Figure \ref{fig:2_sim_control}. To visualize the hexagonal current constraints, the limits regarding inscribed circle at $U_{DC}/ \sqrt{3}$ and the outer circle $2/3 \cdot U_{DC}$ are depicted as well as the circular current constraint $\|\bm{i}_S\| \le I_{max}$.
@@ -1827,14 +1827,16 @@ The quantities of Figure \ref{fig:2_sim_ref} can be interpreted as interface qua
 In Figure \ref{fig:2_sim_control} oscillations in voltage and current can be observed during the over-modulation phase. In the following, these quantities are depicted in detail for each of the three phases separately (see Figures \ref{fig:2_sim_phase1}, \ref{fig:2_sim_phase2} and \ref{fig:2_sim_phase3}).
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=\textwidth]{Figs/2_sim_wramp_constraints_sc.eps}
+	%\includegraphics[width=\textwidth]{Figs/2_sim_wramp_constraints_sc.eps}
+    \includegraphics[width=\textwidth]{Figs/2_sim_wramp_constraints_sc.png}
 	\caption{Simulated speed ramp: voltage and current constraints}
 	\label{fig:2_sim_constr}
 \end{figure}
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=\textwidth]{Figs/2_sim_wramp_constraints_sc_detail.eps}
-	\caption{Simulated speed ramp: voltage and current constraints, detail during deceleration phase}
+	%\includegraphics[width=\textwidth]{Figs/2_sim_wramp_constraints_sc_detail.eps}
+    \includegraphics[width=\textwidth]{Figs/2_sim_wramp_constraints_sc_detail.png}
+    \caption{Simulated speed ramp: voltage and current constraints, detail during deceleration phase}
 	\label{fig:2_sim_constr_detail}
 \end{figure}
 As it can be seen the output of the MPC, could violate the voltage constraints by up to 5 V during the deceleration phase. The first outlier happens $\qty{700}{\micro s}$ and the last $\qty{1100}{\micro s}$ after the reference change. \\
